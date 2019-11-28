@@ -1,0 +1,391 @@
+---
+title: "lamda-alpha-estimates"
+author: "Jens Johnson"
+date: "October 2, 2017"
+output: pdf_document
+---
+# this code generates coexistence parameters for Plectritis and Valerianella 
+# from experimentally obtained measures of vital rates
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(purrr)
+library(repurrrsive)
+library(listviewer)
+library(gnlm)
+```
+
+```{r}
+## the Seed_Counts csv contains info on the seed production and seed characteristics of plants grown against different community densities and in a well-watered or drought-stressed scenario.
+list.files()
+SEEDS <- read.csv("Seed_Counts.csv")
+SEEDS <- SEEDS %>% drop_na(num_seeds)
+# View(SEEDS)
+SEEDS <- select(SEEDS, num_seeds, focal_species, background_species, background_density, treatment)
+View(SEEDS)
+# subset_SEEDS <- filter(SEEDS, focal_species == "PLCO", background_species == "PLCO" | background_species == "none", treatment == "Drought-stressed")
+
+## germination values are assumed to be global, not affected by treatment or seeding densities
+germination_i = 0.670
+germination_j = 0.891
+
+## used maximum likelihood method to estimate parameters
+## We then used gnlr (function
+## ''gnlr,'' method ''L-BFGS-B,'' and negative binomial error
+## structure [R Development Core Team 2011]) to fit both
+## lambda and alpha values (bounded to be positive) according to the function
+
+```
+
+
+```{r}
+## drought-stressed
+## i = PLCO, j = VALO
+##aii
+subset_SEEDS <- filter(SEEDS, focal_species == "PLCO", background_species == "PLCO" | background_species == "none", treatment == "Drought-stressed")
+
+#m2_PLCO_aii_drought <- nls(num_seeds~lambda/(1+alpha*germination_i*background_density), data=subset_SEEDS, start=list(lambda=380, alpha=0.22))
+#y <- subset_SEEDS$num_seeds*germination_i
+x <- subset_SEEDS$background_density
+
+#summary(m2_PLCO_aii_drought)
+#confint(m2_PLCO_aii_drought) 
+attach(subset_SEEDS)
+mu <- function(p) p[1]/(1+p[2]*background_density)
+m2_PLCO_aii_drought <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(380,0.22), pshape=1)
+# sd = se x sqrt(n)
+# se = 42.51
+# n = 43
+stdev = 42.51*sqrt(43)
+rand = rnorm(n=1, mean=364.2, sd=stdev)
+```
+
+```{r}
+## Drought-stressed
+## i = PLCO, j = VALO
+##aij
+subset_SEEDS <- filter(SEEDS, focal_species == "PLCO", background_species == "VALO" | background_species == "none", treatment == "Drought-stressed")
+
+#m2_PLCO_aij_drought <- nls(num_seeds~lambda/(1+alpha*germination_j*background_density), data=subset_SEEDS, start=list(lambda=420, alpha=0.294))
+#y<-subset_SEEDS$num_seeds
+#x<-subset_SEEDS$background_density
+
+#summary(m2_PLCO_aij_drought)
+#confint(m2_PLCO_aij_drought)
+
+attach(subset_SEEDS)
+mu <- function(p) p[1]/(1+p[2]*background_density)
+m2_PLCO_aij_drought <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(360,0.30), pshape=1)
+```
+
+```{r}
+## Drought-stressed
+## i = PLCO, j = VALO
+##ajj
+subset_SEEDS <- filter(SEEDS, focal_species == "VALO", background_species == "VALO" | background_species == "none", treatment == "Drought-stressed")
+
+#m2_VALO_ajj_drought<-nls(num_seeds~lambda/(1+alpha*germination_j*background_density), data=subset_SEEDS, start=list(lambda=500, alpha=0.35))
+#y<-subset_SEEDS$num_seeds
+#x<-subset_SEEDS$background_density
+
+#summary(m2_VALO_ajj_drought)
+#confint(m2_VALO_ajj_drought)
+
+attach(subset_SEEDS)
+mu <- function(p) p[1]/(1+p[2]*background_density)
+m2_VALO_ajj_drought <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(625,0.70), pshape=1)
+```
+
+
+```{r}
+## Drought-stressed
+## i = PLCO, j = VALO
+##ajj
+subset_SEEDS <- filter(SEEDS, focal_species == "VALO", background_species == "PLCO" | background_species == "none", treatment == "Drought-stressed")
+
+#m2_VALO_aji_drought<-nls(num_seeds~lambda/(1+alpha*germination_i*background_density), data=subset_SEEDS, start=list(lambda=500, alpha=0.35))
+#y<-subset_SEEDS$num_seeds
+#x<-subset_SEEDS$background_density
+
+#summary(m2_VALO_aji_drought)
+#confint(m2_VALO_aji_drought)
+
+attach(subset_SEEDS)
+mu <- function(p) p[1]/(1+p[2]*background_density)
+m2_VALO_aji_drought <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(636,0.40), pshape=1)
+```
+
+
+```{r}
+## http://onlinelibrary.wiley.com/doi/10.1890/13-1157.1/full
+## then niche overlap (p) = sqrt((aij/ajj)*(aji/aii))
+## (kj/ki) = ((nj - 1)/(ni - 1))(sqrt((aij/ajj)*(aii/aji))
+## (kj/ki) is here defined as the fitness ratio
+## ni = (lamda_i*germination_i)/(1 - (1 - germination_i)(s_i))
+
+(aij_drought = signif(m2_PLCO_aij_drought$coefficients[2], 4))
+(ajj_drought = signif(m2_VALO_ajj_drought$coefficients[2], 4))
+(aji_drought = signif(m2_VALO_aji_drought$coefficients[2], 4))
+(aii_drought = signif(m2_PLCO_aii_drought$coefficients[2], 4))
+(p_drought = sqrt((aij_drought/ajj_drought)*(aji_drought/aii_drought)))
+(1 / p_drought)
+
+(lambda_i_drought = (signif(m2_PLCO_aii_drought$coefficients[1], 5) + signif(m2_PLCO_aij_drought$coefficients[1], 5)) / 2)
+(lambda_j_drought = (signif(m2_VALO_ajj_drought$coefficients[1], 5) + signif(m2_VALO_aji_drought$coefficients[1], 5)) / 2)
+
+(ni_drought = (lambda_i_drought*germination_i)/(1 - (1 - germination_i)*(1)))
+(nj_drought = (lambda_j_drought*germination_j)/(1 - (1 - germination_j)*(1)))
+## demogrphic ratio (nj - 1/ ni - 1) "describes the degree to which species j produces more seeds (kjgj) per seed loss due to death or germination (1 - (1 - gj)(sj)) than species i" (godoy & levine 2014).
+(demographic_ratio_drought <- (nj_drought - 1)/(ni_drought - 1))
+## the ratio is > 1, thus j (valerianella) produces more seeds per seed loss giving it a higher demographic potential
+
+## the competitive response ratio (sqrt((aij/ajj)*(aii/aji))) "describes the degree to which species j is more resistant to competition than species i. Notice that the numerator and denominator differ only in which species is responding to competition, and the arrangement of the interaction coefficients is not the same as in q." (Godoy & Levine 2014)
+((aij_drought/ajj_drought)*(aii_drought/aji_drought))
+(competitive_response_ratio_drought <- sqrt((aij_drought/ajj_drought)*(aii_drought/aji_drought)))
+## greater than one means top numbers are larger, meaning i more sensitive to competition.
+## less than one means bottom numbers are larger, meaning j more sensitive to competition.
+## the ratio here is less than one, meaning i (Plectritis) is less sensitive to competition.
+  
+## the fitness ratio combines the demographic potential with the competitive response ratio
+## "The demographic ratio and competitive response ratio therefore provide alternative pathways to competitive dominance, and their product, the fitness response ratio, predicts the winner of competition in the case of perfect niche overlap.
+(fitness_ratio_drought = demographic_ratio_drought*competitive_response_ratio_drought)
+## the fitness ratio is 0.656, meaning that Plectritis would win in the case of competition with complete niche overlap. 
+
+## Coexistence requires both species to invade when rare (Chesson 2012). This condition is satisfied when (Godoy & Levine 2014): p < fitness ratio < 1/p
+# p = 0.8364
+# fitness_ratio = 0.771
+# 1 / p = 1.196
+ifelse(p_drought < fitness_ratio_drought & fitness_ratio_drought < 1/p_drought, "coexistence predicted", "coexistence not predicted")
+```
+
+
+#### well-watered
+```{r}
+## well-watered
+## i = PLCO, j = VALO
+##aii
+subset_SEEDS <- filter(SEEDS, focal_species == "PLCO", background_species == "PLCO" | background_species == "none", treatment == "Well-watered")
+
+#m2_PLCO_aii_wet<-nls(num_seeds~lambda/(1+alpha*germination_i*background_density), data=subset_SEEDS, start=list(lambda=489, alpha=0.4897263))
+#y<-subset_SEEDS$num_seeds
+#x<-subset_SEEDS$background_density
+
+#summary(m2_PLCO_aii_wet)
+#confint(m2_PLCO_aii_wet) 
+
+attach(subset_SEEDS)
+mu <- function(p) p[1]/(1+p[2]*background_density)
+m2_PLCO_aii_wet <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(400,0.40), pshape=1)         
+```
+
+```{r}
+## Well-watered
+## i = PLCO, j = VALO
+##aij
+subset_SEEDS <- filter(SEEDS, focal_species == "PLCO", background_species == "VALO" | background_species == "none", treatment == "Well-watered")
+
+#m2_PLCO_aij_wet<-nls(num_seeds~lambda/(1+alpha*germination_j*background_density), data=subset_SEEDS, start=list(lambda=304, alpha=0.407))
+#y<-subset_SEEDS$num_seeds
+#x<-subset_SEEDS$background_density
+
+#summary(m2_PLCO_aij_wet)
+#confint(m2_PLCO_aij_wet)
+
+attach(subset_SEEDS)
+mu <- function(p) p[1]/(1+p[2]*background_density)
+m2_PLCO_aij_wet <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(400,0.40), pshape=1)  
+```
+
+```{r}
+## Well-watered
+## i = PLCO, j = VALO
+##ajj
+subset_SEEDS <- filter(SEEDS, focal_species == "VALO", background_species == "VALO" | background_species == "none", treatment == "Well-watered")
+
+#m2_VALO_ajj_wet<-nls(num_seeds~lambda/(1+alpha*germination_i*background_density), data=subset_SEEDS, start=list(lambda=96.424, alpha=0.088))
+#y<-subset_SEEDS$num_seeds
+#x<-subset_SEEDS$background_density
+
+#summary(m2_VALO_ajj_wet)
+#confint(m2_VALO_ajj_wet)
+
+attach(subset_SEEDS)
+mu <- function(p) p[1]/(1+p[2]*background_density)
+m2_VALO_ajj_wet <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(300,0.45), pshape=1) 
+```
+
+
+```{r}
+## Well-watered
+## i = PLCO, j = VALO
+##aji
+subset_SEEDS <- filter(SEEDS, focal_species == "VALO", background_species == "PLCO" | background_species == "none", treatment == "Well-watered")
+
+#m2_VALO_aji_wet<-nls(num_seeds~lambda/(1+alpha*germination_j*background_density), data=subset_SEEDS, start=list(lambda=615, alpha=0.63))
+#y<-subset_SEEDS$num_seeds
+#x<-subset_SEEDS$background_density
+
+#summary(m2_VALO_aji_wet)
+#confint(m2_VALO_aji_wet)
+
+attach(subset_SEEDS)
+mu <- function(p) p[1]/(1+p[2]*background_density)
+m2_VALO_aji_wet <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(325,0.38), pshape=1) 
+```
+
+
+```{r}
+(aij_wet = signif(m2_PLCO_aij_wet$coefficients[2], 4))
+(ajj_wet = signif(m2_VALO_ajj_wet$coefficients[2], 4))
+(aji_wet = signif(m2_VALO_aji_wet$coefficients[2], 4))
+(aii_wet = signif(m2_PLCO_aii_wet$coefficients[2], 4))
+
+(p_wet = sqrt((aij_wet/ajj_wet)*(aji_wet/aii_wet)))
+(1 / p_wet)
+
+
+## http://onlinelibrary.wiley.com/doi/10.1890/13-1157.1/full
+## (kj/ki) = ((nj - 1)/(ni - 1))(sqrt((aij/ajj)*(aii/aji))
+## (kj/ki) is here defined as the fitness ratio
+## ni = (lamda_i*germination_i)/(1 - (1 - germination_i)(s_i))
+## currently don't have seed survival values (s_i), so will sub a value of 0.50 for both species.
+
+(lambda_i_wet = (signif(m2_PLCO_aii_wet$coefficients[1], 5) + signif(m2_PLCO_aij_wet$coefficients[1], 5)) / 2)
+(lambda_j_wet = (signif(m2_VALO_ajj_wet$coefficients[1], 5) + signif(m2_VALO_aji_wet$coefficients[1], 5)) / 2)
+
+(ni_wet = (lambda_i_wet*germination_i)/(1 - (1 - germination_i)*(1)))
+(nj_wet = (lambda_j_wet*germination_j)/(1 - (1 - germination_j)*(1)))
+## demogrphic ratio (nj - 1/ ni - 1) "describes the degree to which species j produces more seeds (kjgj) per seed loss due to death or germination (1 - (1 - gj)(sj)) than species i" (godoy & levine 2014).
+(demographic_ratio_wet <- (nj_wet - 1)/(ni_wet - 1))
+## the ratio is < 1, thus i (Plectritis) produces more seeds per seed loss giving it a higher demographic potential
+
+## the competitive response ratio (sqrt((aij/ajj)*(aii/aji))) "describes the degree to which species j is more resistant to competition than species i. Notice that the numerator and denominator differ only in which species is responding to competition, and the arrangement of the interaction coefficients is not the same as in q." (Godoy & Levine 2014)
+((aij_wet/ajj_wet)*(aii_wet/aji_wet))
+(competitive_response_ratio_wet <- sqrt((aij_wet/ajj_wet)*(aii_wet/aji_wet)))
+## greater than one means top numbers are larger, meaning i more sensitive to competition.
+## less than one means bottom numbers are larger, meaning j more sensitive to competition.
+## the ratio here is more than one, meaning j (Valerianella) is less sensitive to competition.
+
+## the fitness ratio combines the demographic potential with the competitive response ratio
+## "The demographic ratio and competitive response ratio therefore provide alternative pathways to competitive dominance, and their product, the fitness response ratio, predicts the winner of competition in the case of perfect niche overlap.
+(fitness_ratio_wet = demographic_ratio_wet*competitive_response_ratio_wet)
+## the fitness ratio is 0.995, meaning that i (Plectritis) would win in the case of competition with complete niche overlap. 
+
+## Coexistence requires both species to invade when rare (Chesson 2012). This condition is satisfied when (Godoy & Levine 2014): p (niche overlap) < fitness ratio < 1/p
+# p = 0.8012
+# fitness_ratio = 0.995
+# 1 / p = 1.2482
+ifelse(p_wet < fitness_ratio_wet & fitness_ratio_wet < 1/p_wet, "coexistence predicted", "coexistence not predicted")
+```
+
+
+## to plot all seeds
+```{r}
+## Plot drought
+subset_SEEDS_drought <- filter(SEEDS, treatment == "Drought-stressed")
+subset_SEEDS_drought_PLCO <- filter(SEEDS, treatment == "Drought-stressed", focal_species == "PLCO")
+subset_SEEDS_drought_VALO <- filter(SEEDS, treatment == "Drought-stressed", focal_species == "VALO")
+subset_SEEDS_aii <- filter(SEEDS, focal_species == "PLCO", background_species == "PLCO", treatment == "Drought-stressed")
+subset_SEEDS_aij <- filter(SEEDS, focal_species == "PLCO", background_species == "VALO", treatment == "Drought-stressed")
+subset_SEEDS_aji <- filter(SEEDS, focal_species == "VALO", background_species == "PLCO", treatment == "Drought-stressed")
+subset_SEEDS_ajj <- filter(SEEDS, focal_species == "VALO", background_species == "VALO", treatment == "Drought-stressed")
+
+
+####### (A) plot PLCO focals in dry treatment
+P <- ggplot(subset_SEEDS_drought_PLCO, aes(x = background_density, y = num_seeds, color = interaction(focal_species, background_species, sep=" vs. ",lex.order=TRUE)))
+P <- P + geom_jitter(aes(background_density, num_seeds, shape=background_species), width = 1, size = 4, alpha=.7) 
+
+# function = number_seeds ~ lambda / 1 + alpha*background_density
+function_1 <- function(x) 364/(1+.23*x)
+P <- P + stat_function(data = subset_SEEDS_aii, fun = function_1, size = 2, colour = "black")
+function_2 <- function(x) 364/(1+.30*x)
+P <- P + stat_function(data = subset_SEEDS_aij, fun = function_2, size = 2, colour = "black", linetype = "dashed")
+
+P <- P + scale_shape_manual(values=c(19,1))
+
+P <- P + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="Neighbor Density", y="Seeds/plant") + ggtitle("(A)")
+P <- P + theme(legend.position="none")
+P <- P + scale_color_manual(values=c("black", "black"))
+P <- P + theme(axis.line = element_line(size = 2))
+P
+
+#### (B) Plot VALO focals in dry
+R <- ggplot(subset_SEEDS_drought_VALO, aes(x = background_density, y = num_seeds, color = interaction(focal_species, background_species, sep=" vs. ",lex.order=TRUE)))
+R <- R + geom_jitter(aes(background_density, num_seeds, shape=background_species), width = 1, size = 4, alpha=.7) 
+
+function_3 <- function(x) 636 /(1+.43*x)
+R <- R + stat_function(data = subset_SEEDS_aji, fun = function_3, size = 2, colour = "black", linetype = "dashed")
+function_4 <- function(x) 636 /(1+.72*x)
+R <- R + stat_function(data = subset_SEEDS_ajj, fun = function_4, size = 2, colour = "black")
+
+R <- R + scale_shape_manual(values=c(1,19))
+
+R <- R + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="Neighbor Density", y="Seeds/plant") + ggtitle("(B)")
+R <- R + theme(legend.position="none")
+R <- R + scale_color_manual(values=c("black", "black"))
+R <- R + theme(axis.line = element_line(size = 2))
+R
+
+## Plot wet
+subset_SEEDS_wet <- filter(SEEDS, treatment == "Well-watered")
+subset_SEEDS_wet_PLCO <- filter(SEEDS, treatment == "Well-watered", focal_species == "PLCO")
+subset_SEEDS_wet_VALO <- filter(SEEDS, treatment == "Well-watered", focal_species == "VALO")
+subset_SEEDS_aii_wet <- filter(SEEDS, focal_species == "PLCO", background_species == "PLCO", treatment == "Well-watered")
+subset_SEEDS_aij_wet <- filter(SEEDS, focal_species == "PLCO", background_species == "VALO", treatment == "Well-watered")
+subset_SEEDS_aji_wet <- filter(SEEDS, focal_species == "VALO", background_species == "PLCO", treatment == "Well-watered")
+subset_SEEDS_ajj_wet <- filter(SEEDS, focal_species == "VALO", background_species == "VALO", treatment == "Well-watered")
+
+##### Plot PLCO focals in wet treatment
+Q <- ggplot(subset_SEEDS_wet_PLCO, aes(x = background_density, y = num_seeds, color = interaction(focal_species, background_species, sep=" vs. ",lex.order=TRUE)))
+Q <- Q + geom_jitter(aes(background_density, num_seeds, shape = background_species), width = 1, size = 4, alpha = .7) 
+
+function_5 <- function(x) 428 /(1+.40*x)
+Q <- Q + stat_function(data = subset_SEEDS_aii_wet, fun = function_5, size = 2, colour = "black")
+function_6 <- function(x) 428 /(1+.33*x)
+Q <- Q + stat_function(data = subset_SEEDS_aij_wet, fun = function_6, size = 2, colour = "black", linetype = "dashed")
+
+Q <- Q + scale_shape_manual(values=c(19,1))
+
+Q <- Q + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="Neighbor Density", y="Seeds/plant") + ggtitle("(C)")
+Q <- Q + theme(legend.position="none")
+Q <- Q + scale_color_manual(values=c("black", "black"))
+Q <- Q + theme(axis.line = element_line(size = 2))
+Q
+
+##### plot VALO focals in wet
+S <- ggplot(subset_SEEDS_wet_VALO, aes(x = background_density, y = num_seeds, color = interaction(focal_species, background_species, sep=" vs. ",lex.order=TRUE)))
+S <- S + geom_jitter(aes(background_density, num_seeds, shape = background_species), width = 1, size = 4, alpha = .7) 
+
+function_7 <- function(x) 303 /(1+.48*x)
+S <- S + stat_function(data = subset_SEEDS_aji_wet, fun = function_7, size = 2, colour = "black", linetype = "dashed")
+function_8 <- function(x) 303 /(1+.37*x)
+S <- S + stat_function(data = subset_SEEDS_ajj_wet, fun = function_8, size = 2, colour = "black")
+
+S <- S + scale_shape_manual(values=c(1,19))
+
+S <- S + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="Neighbor Density", y="Seeds/plant") + ggtitle("(D)")
+S <- S + theme(legend.position="none")
+S <- S + scale_color_manual(values=c("black", "black"))
+S <- S + theme(axis.line = element_line(size = 2))
+S
+
+library(cowplot)
+legend_b <- get_legend(P + theme(legend.position="bottom"))
+require(grid)
+require(gridExtra)
+grid.arrange(P, R, Q, S,  ncol=2, nrow=2, 
+             top=textGrob("", gp=gpar(fontsize=20,font=7)))
+
+
+col1<-rbind("p", "demographic ratio", "competitive response ratio", "fitness ratio", "outcome")
+col2<-as.data.frame(rbind(p_dry, demographic_ratio_dry, competitive_response_ratio_dry, fitness_ratio_dry, outcome_dry), row.names = NULL)
+str(col2)
+col3<-as.data.frame(rbind(p_wet, demographic_ratio_wet, competitive_response_ratio_wet, fitness_ratio_wet, outcome_wet), row.names = NULL)
+summary_table<-as.data.frame(cbind(col1, col2, col3))
+summary_table<-summary_table[-1]
+colnames(summary_table) <- c("Dry", "Wet")
+summary_table
+#setwd("C:/Users/")
+#write.csv(summary_table, "summary_table.csv")
+```
