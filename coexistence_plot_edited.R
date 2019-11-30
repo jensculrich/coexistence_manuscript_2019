@@ -264,19 +264,41 @@ sd_inv_growth_rate_j <- as.data.frame(rbind(0.335, 0.357))
 mean_inv_growth_rate_i <- as.data.frame(rbind(2.05, 1.37))
 sd_inv_growth_rate_i <- as.data.frame(rbind(1.01, 0.593))
 
-df2 <- merge(df, mean_inv_growth_rate_j)
+colnames(mean_inv_growth_rate_j) <- "mean_inv_growth_rate"
+colnames(sd_inv_growth_rate_j) <- "sd_inv_growth_rate"
+colnames(mean_inv_growth_rate_i) <- "mean_inv_growth_rate"
+colnames(sd_inv_growth_rate_i) <- "sd_inv_growth_rate"
+
+mean_inv_growth_rate_j$treatment <- rbind("wet", "dry")
+sd_inv_growth_rate_j$treatment <- rbind("wet", "dry")
+mean_inv_growth_rate_i$treatment <- rbind("wet", "dry")
+sd_inv_growth_rate_i$treatment <- rbind("wet", "dry")
+
+mean_inv_growth_rate_j$species <- rbind("Valerianella", "Valerianella")
+sd_inv_growth_rate_j$species <- rbind("Valerianella", "Valerianella")
+mean_inv_growth_rate_i$species <- rbind("Plectritis", "Plectritis")
+sd_inv_growth_rate_i$species <- rbind("Plectritis", "Plectritis")
+
+Valerianella <- merge(mean_inv_growth_rate_j, sd_inv_growth_rate_j)
+Plectritis <- merge(mean_inv_growth_rate_i, sd_inv_growth_rate_i)
+
+df2 <- rbind(Valerianella, Plectritis)
+df2$X <- c("1", "2", "3", "4")
+
 
 #############################
 # plot invasion growth rates
 
-E <- ggplot(df, aes(x=X, y=mean_p, colour=X)) + 
-  geom_errorbar(aes(ymin=mean_p-sd_p, ymax=mean_p+sd_p), width=.2, size = 1) 
-E <- E + geom_point(size = 6) 
+E <- ggplot(df2, aes(x=species, y=mean_inv_growth_rate, colour=treatment)) + 
+  geom_errorbar(aes(ymin=mean_inv_growth_rate-sd_inv_growth_rate, 
+                    ymax=mean_inv_growth_rate+sd_inv_growth_rate), 
+                width=.2, size = 1, position=position_dodge(width = 0.5)) 
+E <- E + geom_point(size = 6, position=position_dodge(width=0.5)) 
 E <- E + theme_bw() 
 E <- E + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
-  theme(legend.title=element_text()) + labs(x="treatment", y="niche overlap") + 
-  ggtitle("(A)") 
-E <- E + theme(legend.position="none")
+  theme(legend.title=element_text()) + labs(x="treatment", y="invasion growth rate") + 
+  ggtitle("(B)") 
+E <- E + theme(legend.title=element_text(size=20), legend.text=element_text(size=20))
 E <- E + scale_color_manual(values=c("black", "grey"))
 E <- E + theme(axis.line = element_line(size = 2))
 E <- E + theme(axis.title.x = element_blank(),
@@ -286,12 +308,23 @@ E <- E + theme(axis.title.x = element_blank(),
                axis.text.x = element_text(
                  size = 20,
                  angle = 0,
-                 vjust = .5
+                 vjust = .5,
+                 face = "italic"
                ),
                # Y axis text
                axis.text.y = element_text(size = 14))
 E <- E + theme(plot.title = element_text(size = 20, face = "bold"))
-E <- E + scale_y_continuous(limits = c(0, 1.2), breaks = c(0, .2, .4, .6, .8, 1, 1.2))
+E <- E + scale_y_continuous(expand = c(0, 0), limits = c(0, 4), breaks = c(0, 1, 2, 3, 4))
 E <- E + geom_hline(yintercept= 1, linetype="dashed", 
                     color = "black", size=2)
+
+E <- E + theme(legend.position = "top")
 E
+
+
+library(gridExtra)
+library(grid)
+require(gridExtra)
+grid.arrange(T, E, ncol=2, nrow=1)
+
+ggarrange(T, E)
