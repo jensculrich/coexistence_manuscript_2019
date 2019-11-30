@@ -138,8 +138,7 @@ T <- T + geom_errorbarh(aes(xmin=0, xmax=(1-mean_p+sd_p), height=.05))
 
 T <- T + theme_bw() + 
   theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
-  theme(legend.title=element_text()) + labs(x=substitute( paste("niche difference (1 - ",  italic('p'), ")" )), y="average fitness ratio") + 
-  ggtitle("(A)") +
+  theme(legend.title=element_text()) + labs(x=substitute( paste("niche difference (1 - ",  italic('p'), ")" )), y="average fitness ratio") +
   theme(legend.position="none")
 # color black for dry, grey for wet
 T <- T + scale_color_manual(values=c("black", "grey"))
@@ -156,27 +155,35 @@ T <- T + theme(axis.title.x = element_text(size = 20),
                # Y axis text
                axis.text.y = element_text(size = 16))
 T <- T + theme(plot.title = element_text(size = 20, face = "bold"))
-T <- T + scale_y_continuous(expand = c(0, 0), limits = c(0, 2), breaks = c(0, .5, 1, 1.5, 2.0))
-T <- T + scale_x_continuous(expand = c(0, 0), limits = c(0, 1.05), breaks = c(0, .2, .4, .6, .8, 1))
+T <- T + scale_y_continuous(labels = function(x) round(as.numeric(x), digits=1), expand = c(0, 0), limits = c(0, 2), breaks = c(0, .5, 1, 1.5, 2.0))
+T <- T + scale_x_continuous(labels = function(x) round(as.numeric(x), digits=1), expand = c(0, 0), limits = c(0, 1.05), breaks = c(0, .2, .4, .6, .8, 1))
 T <- T + geom_hline(yintercept= 1, linetype="dashed", 
                     color = "black", size=1)
 
-T <- T + stat_function(fun = fun.1)
-T <- T + stat_function(fun = fun.2)
+T <- T + stat_function(fun = fun.1, size = 1.5, colour = "grey30")
+T <- T + stat_function(fun = fun.2, size = 1.5, colour = "grey30")
 
 
 grob <- grobTree(textGrob(substitute(paste(italic("Valerianella "), "dominant")), x=0.05,  y=0.83, hjust=0,
                           gp=gpar(col="black", fontsize=20)))
-grob2 <- grobTree(textGrob(substitute(paste(italic("Plectritis "), "dominant")), x=0.05,  y=0.1, hjust=0,
+grob2 <- grobTree(textGrob(substitute(paste(italic("Plectritis "), "dominant")), x=0.05,  y=0.05, hjust=0,
                           gp=gpar(col="black", fontsize=20)))
-grob3 <- grobTree(textGrob("exclusion", x=0.5,  y=0.95, hjust=0,
+grob3 <- grobTree(textGrob("exclusion", x=0.4,  y=0.95, hjust=0,
                           gp=gpar(col="black", fontsize=20)))
-grob4 <- grobTree(textGrob("coexistence", x=0.75,  y=0.6, hjust=0,
+grob4 <- grobTree(textGrob("coexistence", x=0.65,  y=0.6, hjust=0,
                           gp=gpar(col="black", fontsize=20)))
+grob5 <- grobTree(textGrob("exclusion", x=0.4,  y=0.15, hjust=0,
+                           gp=gpar(col="black", fontsize=20)))
+grob6 <- grobTree(textGrob("coexistence", x=0.65,  y=0.4, hjust=0,
+                           gp=gpar(col="black", fontsize=20)))
+
+
 T <- T + annotation_custom(grob)
 T <- T + annotation_custom(grob2)
 T <- T + annotation_custom(grob3)
 T <- T + annotation_custom(grob4)
+T <- T + annotation_custom(grob5)
+T <- T + annotation_custom(grob6)
 T <- T + coord_fixed(ratio = 0.5)
 T
 
@@ -296,8 +303,7 @@ E <- ggplot(df2, aes(x=species, y=mean_inv_growth_rate, colour=treatment)) +
 E <- E + geom_point(size = 6, position=position_dodge(width=0.5)) 
 E <- E + theme_bw() 
 E <- E + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
-  theme(legend.title=element_text()) + labs(x="treatment", y="invasion growth rate") + 
-  ggtitle("(B)") 
+  theme(legend.title=element_text()) + labs(x="treatment", y="invasion growth rate") 
 E <- E + theme(legend.title=element_text(size=20), legend.text=element_text(size=20))
 E <- E + scale_color_manual(values=c("black", "grey"))
 E <- E + theme(axis.line = element_line(size = 2))
@@ -316,15 +322,13 @@ E <- E + theme(axis.title.x = element_blank(),
 E <- E + theme(plot.title = element_text(size = 20, face = "bold"))
 E <- E + scale_y_continuous(expand = c(0, 0), limits = c(0, 4), breaks = c(0, 1, 2, 3, 4))
 E <- E + geom_hline(yintercept= 1, linetype="dashed", 
-                    color = "black", size=2)
+                    color = "black", size=1)
 
-E <- E + theme(legend.position = "top")
+E <- E + theme(legend.position = c(0.75, 0.9))
+E <- E + coord_fixed(ratio = 0.45)
 E
 
 
-library(gridExtra)
-library(grid)
-require(gridExtra)
-grid.arrange(T, E, ncol=2, nrow=1)
 
-ggarrange(T, E)
+ggarrange(T, E, labels = c("(A)", "(B)"), font.label = list(size = 20))
+
