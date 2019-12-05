@@ -1,6 +1,5 @@
-# this file generates predicted fecundities based on plant trait measurements
-# and analyzes relationships between fecundity and hetero-/con-specific densities
-# and environment (soil moisture, soil depth, grass cover)
+# this file analyzes relationships between fecundity 
+# and hetero-/con-specific densities
 
 library(tidyverse)
 library(stats4)
