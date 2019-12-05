@@ -481,10 +481,11 @@ T <- T + annotation_custom(grob4)
 T <- T + annotation_custom(grob5)
 T <- T + annotation_custom(grob6)
 T <- T + coord_fixed(ratio = 0.5)
+T <- T + theme(axis.line = element_line(colour = 'black', size = 1))
 T
 ```
 
-## Calculare low-density invasion growth rates (Fig 1B)
+## Calculare low-density invasion growth rates (and plot Fig 1B)
 ```{r}
 # invasion growth rates
 
@@ -622,10 +623,15 @@ E <- E + geom_hline(yintercept= 1, linetype="dashed",
 
 E <- E + theme(legend.position = c(0.75, 0.9))
 E <- E + coord_fixed(ratio = 0.45)
+E <- E + theme(axis.line = element_line(colour = 'black', size = 1))
 E
 ```
 
 ## Plot Fig 1
 ```{r}
-ggarrange(T, E, labels = c("(A)", "(B)"), font.label = list(size = 20))
+
+ggarrange(T + theme(plot.margin = margin(r = 0, l = 0, t = 45, b = 25)), 
+          E + theme(plot.margin = margin(r = 0, l = 20, t = 0, b = 0)), 
+          labels = c("(A)", "(B)"), font.label = list(size = 20))
+
 ```
