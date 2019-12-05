@@ -134,13 +134,12 @@ newdat2$Species = "Valerianella"
 
 V <- ggplot(data = fitness_and_abundances, aes(x = as.numeric(X.grasscover.1m.2),
                                                y = num_seeds2))
-V <- V + geom_point(size = 4, alpha = 0.7, aes(shape = Species))
-V <- V + geom_line(data = newdat, aes(x = X.grasscover.1m.2, y = y), size = 2.5)
-V <- V + geom_line(data = newdat2, aes(x = X.grasscover.1m.2, y = y), size = 2.5, linetype= "dashed")
+V <- V + geom_point(size = 2, alpha = 0.7, aes(shape = Species))
+V <- V + geom_line(data = newdat, aes(x = X.grasscover.1m.2, y = y), size = 1)
+V <- V + geom_line(data = newdat2, aes(x = X.grasscover.1m.2, y = y), size = 1, linetype= "dashed")
 V <- V + theme_bw() + 
   theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(),panel.border = element_blank()) + 
-  theme(legend.title=element_text()) + labs(x=expression(paste("Percent grass cover (1 ", m^2, ")")), y="Predicted seeds per plant") + 
-  ggtitle("(A)") +
+  theme(legend.title=element_text()) + labs(x=expression(paste("Percent grass cover (1 ", m^2, ")")), y="Predicted seeds per plant") +
   theme(legend.position="none")
 V <- V + scale_color_manual(values=c("black", "black"))
 V <- V + scale_shape_manual(values=c(19, 1))
@@ -158,6 +157,7 @@ V <- V + theme(axis.title.x = element_text(vjust = 0,
                # Y axis text
                axis.text.y = element_text(size = 20))
 V <- V + theme(plot.title = element_text(size = 20, face = "bold"))
+V <- V + theme(axis.line = element_line(colour = 'black', size = 1))
 V
 
 
@@ -217,13 +217,12 @@ newdat2$Species = "Valerianella"
 
 X <- ggplot(data = fitness_and_abundances, aes(x = as.numeric(avg_soil_moisture_7.6cm),
                                                y = num_seeds2))
-X <- X + geom_point(size = 4, alpha = 0.7, aes(shape = Species))
-X <- X + geom_line(data = newdat, aes(x = avg_soil_moisture_7.6cm, y = y, color = Species), size = 2.5)
-X <- X + geom_line(data = newdat2, aes(x = avg_soil_moisture_7.6cm, y = y, color = Species), size = 2.5, linetype = "dashed")
+X <- X + geom_point(size = 2, alpha = 0.7, aes(shape = Species))
+X <- X + geom_line(data = newdat, aes(x = avg_soil_moisture_7.6cm, y = y, color = Species), size = 1)
+X <- X + geom_line(data = newdat2, aes(x = avg_soil_moisture_7.6cm, y = y, color = Species), size = 1, linetype = "dashed")
 X <- X + theme_bw() + 
   theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
-  theme(legend.title=element_text()) + labs(x="Soil moisture at 7.6 cm depth (%VWC)", y="Predicted seeds per plant") + 
-  ggtitle("(C)") +
+  theme(legend.title=element_text()) + labs(x="Soil moisture at 7.6 cm depth (%VWC)", y="Predicted seeds per plant") +
   theme(legend.position="none")
 X <- X + scale_color_manual(values=c("black", "black"))
 X <- X + scale_shape_manual(values=c(19,1))
@@ -241,6 +240,7 @@ X <- X + theme(axis.title.x = element_text(vjust = 0,
                # Y axis text
                axis.text.y = element_text(size = 20))
 X <- X + theme(plot.title = element_text(size = 20, face = "bold"))
+X <- X + theme(axis.line = element_line(colour = 'black', size = 1))
 X
 
 # edit data frame further for deep soil moisture. 
@@ -282,13 +282,12 @@ newdat2$Species = "Valerianella"
 
 Y <- ggplot(data = fitness_and_abundances, aes(x = as.numeric(avg_soil_moisture_12cm),
                                                y = num_seeds2))
-Y <- Y + geom_point(size = 4, alpha = 0.7, aes(shape = Species))
-Y <- Y + geom_line(data = newdat, aes(x = avg_soil_moisture_12cm, y = y), size = 2.5)
-Y <- Y + geom_line(data = newdat2, aes(x = avg_soil_moisture_12cm, y = y), size = 2.5, linetype = "dashed")
+Y <- Y + geom_point(size = 2, alpha = 0.7, aes(shape = Species))
+Y <- Y + geom_line(data = newdat, aes(x = avg_soil_moisture_12cm, y = y), size = 1)
+Y <- Y + geom_line(data = newdat2, aes(x = avg_soil_moisture_12cm, y = y), size = 1, linetype = "dashed")
 Y <- Y + theme_bw() + 
   theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
-  theme(legend.title=element_text()) + labs(x="Soil moisture at 12 cm depth (%VWC)", y="Predicted seeds per plant") + 
-  ggtitle("(D)") +
+  theme(legend.title=element_text()) + labs(x="Soil moisture at 12 cm depth (%VWC)", y="Predicted seeds per plant") +
   theme(legend.position="none")
 Y <- Y + scale_color_manual(values=c("black", "black"))
 Y <- Y + scale_shape_manual(values=c(1, 19))
@@ -306,6 +305,7 @@ Y <- Y + theme(axis.title.x = element_text(vjust = 0,
                # Y axis text
                axis.text.y = element_text(size = 20))
 Y <- Y + theme(plot.title = element_text(size = 20, face = "bold"))
+Y <- Y + theme(axis.line = element_line(colour = 'black', size = 1))
 Y
 
 
@@ -333,13 +333,12 @@ anova(m11.1)
 #order <- c("<7", "7<x<12", ">12")
 
 Z <- ggplot(data=subset(fitness_and_abundances_temp2, !is.na(soil.depth.1)), aes(x=soil.depth.1, y=num_seeds2, color=Species))
-Z <- Z + geom_boxplot(lwd=2)
+Z <- Z + geom_boxplot(lwd=1)
 #Z <- Z + 
 #  scale_x_discrete(limits=order)
 Z <- Z + theme_bw() + 
   theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
-  theme(legend.title=element_text()) + labs(x="soil depth", y="Predicted seeds per plant") + 
-  ggtitle("(B)") +
+  theme(legend.title=element_text()) + labs(x="soil depth", y="Predicted seeds per plant") +
   theme(legend.position="none")
 Z <- Z + scale_color_manual(values=c("black", "grey"))
 Z <- Z + theme(axis.line = element_line(size = 2))
@@ -356,6 +355,7 @@ Z <- Z + theme(axis.title.x = element_text(vjust = 0,
                # Y axis text
                axis.text.y = element_text(size = 20))
 Z <- Z + theme(plot.title = element_text(size = 20, face = "bold"))
+Z <- Z + theme(axis.line = element_line(colour = 'black', size = 1))
 Z
 
 ############
@@ -366,3 +366,9 @@ require(gridExtra)
 grid.arrange(V, Z, X, Y, ncol=2, nrow=2, 
              top=textGrob("", gp=gpar(fontsize=20,font=7))
 )
+
+ggarrange(V + theme(plot.margin = margin(r = 10, l = 10, t = 60, b = 10)), 
+          Z + theme(plot.margin = margin(r = 10, l = 10, t = 60, b = 10)), 
+          X + theme(plot.margin = margin(r = 10, l = 10, t = 60, b = 10)), 
+          Y + theme(plot.margin = margin(r = 10, l = 10, t = 60, b = 10)), 
+          labels = c("(A)", "(B)", "(C)", "(D)"), font.label = list(size = 20))
