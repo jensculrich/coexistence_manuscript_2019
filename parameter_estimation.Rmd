@@ -635,3 +635,136 @@ ggarrange(T + theme(plot.margin = margin(r = 0, l = 0, t = 45, b = 25)),
           labels = c("(A)", "(B)"), font.label = list(size = 20))
 
 ```
+
+## Plot supplementary figure S2
+```{r}
+## Plot drought
+subset_SEEDS_drought <- filter(SEEDS, treatment == "Drought-stressed")
+subset_SEEDS_drought_PLCO <- filter(SEEDS, treatment == "Drought-stressed", focal_species == "PLCO")
+subset_SEEDS_drought_VALO <- filter(SEEDS, treatment == "Drought-stressed", focal_species == "VALO")
+subset_SEEDS_aii <- filter(SEEDS, focal_species == "PLCO", background_species == "PLCO", treatment == "Drought-stressed")
+subset_SEEDS_aij <- filter(SEEDS, focal_species == "PLCO", background_species == "VALO", treatment == "Drought-stressed")
+subset_SEEDS_aji <- filter(SEEDS, focal_species == "VALO", background_species == "PLCO", treatment == "Drought-stressed")
+subset_SEEDS_ajj <- filter(SEEDS, focal_species == "VALO", background_species == "VALO", treatment == "Drought-stressed")
+
+
+
+####### (A) plot PLCO focals in dry treatment
+P <- ggplot(subset_SEEDS_drought_PLCO, aes(x = background_density, y = num_seeds, color = interaction(focal_species, background_species, sep=" vs. ",lex.order=TRUE)))
+P <- P + geom_jitter(aes(background_density, num_seeds, shape=background_species), width = 1, size = 2, alpha=.7) 
+# function = number_seeds ~ lambda / 1 + alpha*background_density
+function_1 <- function(x) 364/(1+.23*x)
+P <- P + stat_function(data = subset_SEEDS_aii, fun = function_1, size = 1, colour = "black")
+function_2 <- function(x) 364/(1+.30*x)
+P <- P + stat_function(data = subset_SEEDS_aij, fun = function_2, size = 1, colour = "black", linetype = "dashed")
+P <- P + scale_shape_manual(values=c(19,1))
+P <- P + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="Neighbor Density", y="Seeds/plant") + ggtitle("(A)")
+P <- P + theme(legend.position="none")
+P <- P + scale_color_manual(values=c("black", "black"))
+P <- P + theme(axis.line = element_line(size = 2))
+P <- P + theme(axis.title.x = element_text(size = 20),
+               # Y axis title
+               axis.title.y = element_text(size = 20),
+               # X axis text
+               axis.text.x = element_text(
+                 size = 16,
+                 angle = 0,
+                 vjust = 1
+               ),
+               # Y axis text
+               axis.text.y = element_text(size = 16))
+P
+
+#### (B) Plot VALO focals in dry
+R <- ggplot(subset_SEEDS_drought_VALO, aes(x = background_density, y = num_seeds, color = interaction(focal_species, background_species, sep=" vs. ",lex.order=TRUE)))
+R <- R + geom_jitter(aes(background_density, num_seeds, shape=background_species), width = 1, size = 2, alpha=.7) 
+function_3 <- function(x) 636 /(1+.43*x)
+R <- R + stat_function(data = subset_SEEDS_aji, fun = function_3, size = 1, colour = "black", linetype = "dashed")
+function_4 <- function(x) 636 /(1+.72*x)
+R <- R + stat_function(data = subset_SEEDS_ajj, fun = function_4, size = 1, colour = "black")
+R <- R + scale_shape_manual(values=c(1,19))
+R <- R + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="Neighbor Density", y="Seeds/plant") + ggtitle("(B)")
+R <- R + theme(legend.position="none")
+R <- R + scale_color_manual(values=c("black", "black"))
+R <- R + theme(axis.line = element_line(size = 2))
+R <- R + theme(axis.title.x = element_text(size = 20),
+               # Y axis title
+               axis.title.y = element_text(size = 20),
+               # X axis text
+               axis.text.x = element_text(
+                 size = 16,
+                 angle = 0,
+                 vjust = 1
+               ),
+               # Y axis text
+               axis.text.y = element_text(size = 16))
+R
+
+## Plot wet
+subset_SEEDS_wet <- filter(SEEDS, treatment == "Well-watered")
+subset_SEEDS_wet_PLCO <- filter(SEEDS, treatment == "Well-watered", focal_species == "PLCO")
+subset_SEEDS_wet_VALO <- filter(SEEDS, treatment == "Well-watered", focal_species == "VALO")
+subset_SEEDS_aii_wet <- filter(SEEDS, focal_species == "PLCO", background_species == "PLCO", treatment == "Well-watered")
+subset_SEEDS_aij_wet <- filter(SEEDS, focal_species == "PLCO", background_species == "VALO", treatment == "Well-watered")
+subset_SEEDS_aji_wet <- filter(SEEDS, focal_species == "VALO", background_species == "PLCO", treatment == "Well-watered")
+subset_SEEDS_ajj_wet <- filter(SEEDS, focal_species == "VALO", background_species == "VALO", treatment == "Well-watered")
+
+##### Plot PLCO focals in wet treatment
+Q <- ggplot(subset_SEEDS_wet_PLCO, aes(x = background_density, y = num_seeds, color = interaction(focal_species, background_species, sep=" vs. ",lex.order=TRUE)))
+Q <- Q + geom_jitter(aes(background_density, num_seeds, shape = background_species), width = 1, size = 2, alpha = .7) 
+function_5 <- function(x) 428 /(1+.40*x)
+Q <- Q + stat_function(data = subset_SEEDS_aii_wet, fun = function_5, size = 1, colour = "black")
+function_6 <- function(x) 428 /(1+.33*x)
+Q <- Q + stat_function(data = subset_SEEDS_aij_wet, fun = function_6, size = 1, colour = "black", linetype = "dashed")
+Q <- Q + scale_shape_manual(values=c(19,1))
+Q <- Q + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="Neighbor Density", y="Seeds/plant") + ggtitle("(C)")
+Q <- Q + theme(legend.position="none")
+Q <- Q + scale_color_manual(values=c("black", "black"))
+Q <- Q + theme(axis.line = element_line(size = 2))
+Q <- Q + theme(axis.title.x = element_text(size = 20),
+               # Y axis title
+               axis.title.y = element_text(size = 20),
+               # X axis text
+               axis.text.x = element_text(
+                 size = 16,
+                 angle = 0,
+                 vjust = 1
+               ),
+               # Y axis text
+               axis.text.y = element_text(size = 16))
+Q
+
+##### plot VALO focals in wet
+S <- ggplot(subset_SEEDS_wet_VALO, aes(x = background_density, y = num_seeds, color = interaction(focal_species, background_species, sep=" vs. ",lex.order=TRUE)))
+S <- S + geom_jitter(aes(background_density, num_seeds, shape = background_species), width = 1, size = 2, alpha = .7) 
+function_7 <- function(x) 303 /(1+.48*x)
+S <- S + stat_function(data = subset_SEEDS_aji_wet, fun = function_7, size = 1, colour = "black", linetype = "dashed")
+function_8 <- function(x) 303 /(1+.37*x)
+S <- S + stat_function(data = subset_SEEDS_ajj_wet, fun = function_8, size = 1, colour = "black")
+S <- S + scale_shape_manual(values=c(1,19))
+S <- S + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="Neighbor Density", y="Seeds/plant") + ggtitle("(D)")
+S <- S + theme(legend.position="none")
+S <- S + scale_color_manual(values=c("black", "black"))
+S <- S + theme(axis.line = element_line(size = 2))
+S <- S + theme(axis.title.x = element_text(size = 20),
+               # Y axis title
+               axis.title.y = element_text(size = 20),
+               # X axis text
+               axis.text.x = element_text(
+                 size = 16,
+                 angle = 0,
+                 vjust = 1
+               ),
+               # Y axis text
+               axis.text.y = element_text(size = 16))
+S
+
+
+
+library(cowplot)
+legend_b <- get_legend(P + theme(legend.position="bottom"))
+require(grid)
+require(gridExtra)
+grid.arrange(P, R, Q, S,  ncol=2, nrow=2, 
+             top=textGrob("", gp=gpar(fontsize=20,font=7)))
+```
