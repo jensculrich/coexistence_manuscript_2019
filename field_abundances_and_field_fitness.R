@@ -80,13 +80,12 @@ levels(fitness_and_abundances_filtered$Species)[levels(fitness_and_abundances_fi
 
 P <- ggplot(data = fitness_and_abundances_filtered, aes(x = X.Plectritis..including.pollinator.focal.plants.,
                                                         y = num_seeds2), color = Species)
-P <- P + geom_point(size = 3, alpha = 0.7, aes(shape = Species))
+P <- P + geom_point(size = 2, alpha = 0.7, aes(shape = Species))
 P <- P + geom_segment(aes(x=0,xend=130,y=37.3240,yend=37.3240), color ="black", size = 1)
 P <- P + geom_line(data = newdat, aes(x = X.Plectritis..including.pollinator.focal.plants., y = y, color = Species), size = 1, linetype = "dashed")
 P <- P + theme_bw() + 
   theme(legend.position = c(0.75, 0.9), plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
-  labs(x=expression(paste("Plectritis density (0.1", m^2, ")")), y="Predicted seeds per plant") + 
-  ggtitle("(A)") 
+  labs(x=expression(paste("Plectritis density (0.1", m^2, ")")), y="Predicted seeds per plant") 
 P <- P + scale_color_manual(values=c("black", "black"))
 P <- P + scale_shape_manual(values=c(19, 1))
 P <- P + theme(axis.line = element_line(size = 2))
@@ -108,6 +107,7 @@ P <- P + theme(axis.title.x = element_text(vjust = 0,
 P <- P  + theme(plot.title = element_text(size = 20, face = "bold"))
 P <- P + guides(color = FALSE)
 P <- P + theme(axis.line = element_line(colour = 'black', size = 1))
+P <- P + theme(plot.margin = margin(r = 4, l = 4))
 P
 
 
@@ -142,13 +142,12 @@ fitness_and_abundances_PLCO2_filtered <- fitness_and_abundances_PLCO2_filtered %
 
 T <- ggplot(data = fitness_and_abundances_filtered, aes(x = X.Valerianella,
                                                         y = num_seeds2), color = Species)
-T <- T + geom_point(size = 3, alpha = 0.7, aes(shape = Species))
+T <- T + geom_point(size = 2, alpha = 0.7, aes(shape = Species))
 T <- T + geom_segment(aes(x=0,xend=20,y=37.32403,yend=37.32403), color ="black", size = 1)
 T <- T + geom_line(data = newdat2, aes(x = X.Valerianella, y = y, color = Species), size = 1, linetype = "dashed")
 T <- T + theme_bw() + 
   theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
-  theme(legend.title=element_text()) + labs(x=expression(paste("Valerianella density (0.1", m^2, ")")), y="Predicted seeds per plant") + 
-  ggtitle("(B)") +
+  theme(legend.title=element_text()) + labs(x=expression(paste("Valerianella density (0.1", m^2, ")")), y="Predicted seeds per plant") +
   theme(legend.position="none")
 T <- T + scale_shape_manual(values=c(19, 1))
 T <- T + scale_color_manual(values=c("black", "black"))
@@ -205,14 +204,13 @@ newdat3$y <- 1.78444 - 0.37723*newdat3$X.Plectritis..including.pollinator.focal.
 R <- ggplot(df_filtered, aes(x = log(1 + X.Plectritis..including.pollinator.focal.plants.), 
                              y = log(1 + X.Valerianella)))
 R <- R + geom_point(aes(log(1 + X.Plectritis..including.pollinator.focal.plants.), 
-                        log(1 + X.Valerianella), shape = Site), size = 3, alpha = 1) 
+                        log(1 + X.Valerianella), shape = Site), size = 2, alpha = 1) 
 R <- R + geom_line(data = newdat3, aes(x = X.Plectritis..including.pollinator.focal.plants.....seq.0..4.5.., 
                                        y = y), size = 1, colour = "black")
 R <- R + theme_bw() + theme(plot.title = element_text(hjust = 0), 
                             panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
   theme(legend.position = c(.8, .99), legend.title=element_text()) + 
-  labs(x=expression(paste("log(Plectritis density per 0.1", m^2, ")")), y=expression(paste("log(Valerianella density per 0.1", m^2, ")"))) + 
-  ggtitle("(C)")
+  labs(x=expression(paste("log(Plectritis density per 0.1", m^2, ")")), y=expression(paste("log(Valerianella density per 0.1", m^2, ")")))
 R <- R + scale_color_manual(values=c("black", "black"))
 R <- R + scale_shape_manual(values=c(1, 16))
 R <- R + theme(axis.line = element_line(size = 2))
@@ -248,14 +246,13 @@ newdat4$y <- 3.7998 - 0.2947*newdat4$X.Plectritis.1m.2..including.subplots.....s
 S <- ggplot(df_filtered, aes(x = log(1 + X.Plectritis.1m.2..including.subplots.), 
                              y = log(1 + X.Valerianella.1m.2..including.subplots.)))
 S <- S + geom_point(aes(log(1 + X.Plectritis.1m.2..including.subplots.), 
-                        log(1 + X.Valerianella.1m.2..including.subplots.), shape = Site), size = 3, alpha = 0.7) 
+                        log(1 + X.Valerianella.1m.2..including.subplots.), shape = Site), size = 2, alpha = 0.7) 
 S <- S + geom_line(data = newdat4, aes(x = X.Plectritis.1m.2..including.subplots.....seq.0..7..0.1., 
                                        y = y), size = 1, colour = "black")
 S <- S + theme_bw() + theme(plot.title = element_text(hjust = 0), 
                             panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
   theme(legend.position = "none", legend.title=element_blank()) + 
-  labs(x=expression(paste("log(Plectritis density per 1", m^2, ")")), y=expression(paste("log(Valerianella density per 1", m^2, ")"))) + 
-  ggtitle("(D)")
+  labs(x=expression(paste("log(Plectritis density per 1", m^2, ")")), y=expression(paste("log(Valerianella density per 1", m^2, ")")))
 S <- S + scale_color_manual(values=c("black", "black"))
 S <- S + scale_shape_manual(values=c(1, 16))
 S <- S + theme(axis.line = element_line(size = 2))
@@ -277,25 +274,11 @@ S <- S + theme(axis.line = element_line(colour = 'black', size = 1))
 S
 
 
-require(grid)
-require(gridExtra)
-grid.arrange(R, S, ncol=1, nrow=2, 
-             top=textGrob("", gp=gpar(fontsize=20,font=7)))
+# reload figure P first
+ggarrange(P + theme(plot.margin = margin(r = 0, l = 10, t = 80, b = 20)), 
+          T + theme(plot.margin = margin(r = 0, l = 10, t = 80, b = 20)), 
+          R + theme(plot.margin = margin(r = 0, l = 10, t = 20, b = 0)), 
+          S + theme(plot.margin = margin(r = 0, l = 30, t = 20, b = 0)), 
+          labels = c("(A)", "(B)", "(C)", "(D)"), font.label = list(size = 20))
 
 
-
-require(gridExtra)
-PTRS <- grid.arrange(P, T, R, S, ncol=2, nrow=2, 
-                     top=textGrob("", gp=gpar(fontsize=20,font=7),
-                                  theme(plot.margin=margin(10,10,10,10)))
-)
-
-
-# increase margin area
-PTRS <- grid.arrange(grobs= lapply(pl, "+", theme(plot.margin=margin(10,10,10,10)),
-                    P, T, R, S, ncol=2, nrow=2, 
-                     top=textGrob("", gp=gpar(fontsize=20,font=7))
-  )
-)
-
-grobs= lapply(pl, "+", theme(plot.margin=margin(10,10,10,10)))
