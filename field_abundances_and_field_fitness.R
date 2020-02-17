@@ -10,6 +10,7 @@ library(broom)
 library(purrr)
 library(repurrrsive)
 library(listviewer)
+library(ggpubr)
 
 
 fitness_and_abundances <- read.csv("fitness_and_abundances.csv")
