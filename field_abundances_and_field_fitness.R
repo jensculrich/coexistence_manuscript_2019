@@ -14,8 +14,19 @@ library(ggpubr)
 
 
 fitness_and_abundances <- read.csv("fitness_and_abundances.csv")
+fitness_and_abundances <- fitness_and_abundances %>%
+  mutate(Transect = factor(Transect)) %>%
+  mutate(Plot = factor(Plot))
+
 fitness_and_abundances_PLCO <- read.csv("fitness_and_abundances_PLCO.csv")
+fitness_and_abundances_PLCO <- fitness_and_abundances_PLCO %>%
+  mutate(Transect = factor(Transect)) %>%
+  mutate(Plot = factor(Plot))
+
 fitness_and_abundances_VALO <- read.csv("fitness_and_abundances_VALO.csv")
+fitness_and_abundances_VALO <- fitness_and_abundances_VALO %>%
+  mutate(Transect = factor(Transect)) %>%
+  mutate(Plot = factor(Plot))
 
 ### remove the big outlier from the data set (many more seeds preditced vs any other plot)
 which.max(fitness_and_abundances_PLCO$num_seeds2)
@@ -25,51 +36,36 @@ fitness_and_abundances_PLCO2 <- fitness_and_abundances_PLCO[-31, ]
 which.max(fitness_and_abundances_VALO$X.Plectritis..including.pollinator.focal.plants.)
 fitness_and_abundances_VALO2 <- fitness_and_abundances_VALO[-9, ]
 
-### at the 0.1m^2 scale at least the number of seeds per plant is highly variable at low abundances
-### but then regulates as the number of plectritis passes ~15 per 0.1m^2
-### maybe suggesting that population regulates itself as densities increaseS
+### remove thetis lake data, where no Valerianella found
 fitness_and_abundances_VALO2_filtered <- fitness_and_abundances_VALO2 %>% 
   filter(Site != "Thetis")
 fitness_and_abundances_PLCO2_filtered <- fitness_and_abundances_PLCO2 %>% 
   filter(Site != "Thetis")
 
 m1 <- lme(num_seeds2 ~ X.Plectritis..including.pollinator.focal.plants., 
-          data = fitness_and_abundances_PLCO2_filtered, random=~1|Site,  na.action=na.omit) 
+          data = fitness_and_abundances_PLCO2_filtered, random=~1|Site/Transect/Plot,  na.action=na.omit) 
 summary(m1) # # Plectritis is non-significant
-## intercept is significant is exp(3.5716245) = 35.56037, p < 0.001
+## intercept is significant is 36.22965, p < 0.001
 m1.2 <- lme(num_seeds2 ~ 1, 
-            data = fitness_and_abundances_PLCO2_filtered, random=~1|Site,  na.action=na.omit) 
+            data = fitness_and_abundances_PLCO2_filtered, random=~1|Site/Transect/Plot,  na.action=na.omit) 
 # reduce the model to just calc intercept.
 summary(m1.2) # 
-## intercept is significant = 37.3240, p < 0.001, SSE = 6.77.
+## intercept is significant = 37.35814, p < 0.001, SSE = 6.77.
 anova(m1)
 
 m1.3 <- lme(num_seeds2 ~ X.Plectritis..including.pollinator.focal.plants., 
-            data = fitness_and_abundances_VALO2_filtered, random=~1|Site,  na.action=na.omit) 
+            data = fitness_and_abundances_VALO2_filtered, random=~1|Site/Transect/Plot,  na.action=na.omit) 
 m1.4 <- lme(num_seeds2 ~ 1, 
-            data = fitness_and_abundances_VALO2_filtered, random=~1|Site,  na.action=na.omit) 
-summary(m1.3) # Plectritis is significant = -0.20090, p <  0.00299 
-# intercept is significant = 36.80011, p < 0.05
+            data = fitness_and_abundances_VALO2_filtered, random=~1|Site/Transect/Plot,  na.action=na.omit) 
+summary(m1.3) # Plectritis is significant = -0.18459, p = 0.01
+## intercept is significant = 36.676, p < 0.001
 # R^2 is low, 0.1059, SSE = 6.626
 anova(m1.3)
-resid(m1.3)
-
-# calculate residuals for PLCO
-fitness_and_abundances_PLCO2_filtered <- fitness_and_abundances_PLCO2 %>%
-  mutate(residual = num_seeds2 - 37.3240) 
-# calculate residuals for VALO
-r <- fitness_and_abundances_VALO2_filtered %>%
-  do(augment(lme(num_seeds2 ~ X.Plectritis..including.pollinator.focal.plants., 
-                 data = ., random=~1|Site,  na.action=na.omit)))
-
-fitness_and_abundances_VALO2_filtered <- fitness_and_abundances_VALO2_filtered %>%
-  mutate(residual = resid(m1.3)) 
-
 
 # calculate some new data to show relationship between VALO fitness and PLCO abundance
 newdat <- data.frame(X.Plectritis..including.pollinator.focal.plants. <- seq(0, 60, .5))
 newdat <- newdat %>% 
-  mutate(y = 36.80011 - 0.21019*X.Plectritis..including.pollinator.focal.plants.) %>% 
+  mutate(y = 36.676 - 0.18459*X.Plectritis..including.pollinator.focal.plants.) %>% 
   mutate(Species = "VALO")
 
 fitness_and_abundances_filtered <- fitness_and_abundances %>% 
@@ -81,7 +77,7 @@ levels(fitness_and_abundances_filtered$Species)[levels(fitness_and_abundances_fi
 P <- ggplot(data = fitness_and_abundances_filtered, aes(x = X.Plectritis..including.pollinator.focal.plants.,
                                                         y = num_seeds2), color = Species)
 P <- P + geom_point(size = 2, alpha = 0.7, aes(shape = Species))
-P <- P + geom_segment(aes(x=0,xend=130,y=37.3240,yend=37.3240), color ="black", size = 1)
+P <- P + geom_segment(aes(x=0,xend=130,y=37.35814,yend=37.35814), color ="black", size = 1)
 P <- P + geom_line(data = newdat, aes(x = X.Plectritis..including.pollinator.focal.plants., y = y, color = Species), size = 1, linetype = "dashed")
 P <- P + theme_bw() + 
   theme(legend.position = c(0.75, 0.9), plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
