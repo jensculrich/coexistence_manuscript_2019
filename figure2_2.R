@@ -99,7 +99,7 @@ P <- P + geom_line(data = newdata, aes(x = X.Plectritis..including.pollinator.fo
 P <- P + geom_segment(aes(x=0,xend=110,y=37.1,yend=37.1), color ="black", size = 1)
 P <- P + theme_bw() + theme(plot.title = element_text(hjust = 0), 
                             panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
-  theme(legend.position = "none", legend.title=element_blank()) + 
+  theme(legend.position = c(.8, .8), legend.title=element_text()) + 
   labs(x=expression(paste("Plectritis / 0.1", m^2)), y="Seeds / plant")
 P <- P + scale_color_manual(values=c("black", "black"))
 P <- P + scale_shape_manual(values=c(19, 1))
@@ -119,6 +119,8 @@ P <- P + theme(axis.title.x = element_text(vjust = 0,
 P <- P + theme(plot.title = element_text(size = 20, face = "bold"))
 P <- P + theme(axis.line = element_line(colour = 'black', size = 1))
 P <- P + geom_ribbon(data = newdata, aes(ymin = LL, ymax = UL), alpha = .25)
+P <- P + theme(legend.text=element_text(size=rel(1.5)))
+P <- P + theme(legend.title=element_text(size=rel(1.5)))
 P
 
 
@@ -195,6 +197,7 @@ mixed_m9 <- glmer.nb(X.Valerianella ~ X.Plectritis..including.pollinator.focal.p
                        + (1|Site/Transect/Plot), 
                        data = df_filtered,  na.action=na.omit) 
 summary(mixed_m9) 
+anova(mixed_m9)
 
 summary(m_abundances_1 <- glm.nb(X.Valerianella
                                  ~ X.Plectritis..including.pollinator.focal.plants., 
@@ -256,6 +259,7 @@ mixed_m10 <- glmer.nb(X.Valerianella.1m.2..including.subplots. ~ X.Plectritis.1m
                       + (1|Site/Transect/Plot), 
                       data = df_filtered,  na.action=na.omit) 
 summary(mixed_m10) 
+anova(mixed_m10)
 
 summary(m_abundances_2 <- glm.nb(X.Valerianella.1m.2..including.subplots.
                                  ~ X.Plectritis.1m.2..including.subplots., 
@@ -315,10 +319,10 @@ ggarrange(P + theme(plot.margin = margin(r = 0, l = 35, t = 25, b = 0)),
           R + theme(plot.margin = margin(r = 0, l = 10, t = 20, b = 10)), 
           S + theme(plot.margin = margin(r = 2, l = 10, t = 20, b = 10)), 
           labels = c("(A)", "(B)", "(C)", "(D)"), font.label = list(size = 16))
-ggarrange(P + theme(plot.margin = margin(r = 10, l = 10, t = 10, b = 0)), 
-          T + theme(plot.margin = margin(r = 10, l = 10, t = 10, b = 0)), 
-          R + theme(plot.margin = margin(r = 10, l = 10, t = 10, b = 0)), 
-          S + theme(plot.margin = margin(r = 10, l = 10, t = 20, b = 0)), 
+ggarrange(P + theme(plot.margin = margin(r = 5, l = 5, t = 5, b = 5)), 
+          T + theme(plot.margin = margin(r = 5, l = 5, t = 5, b = 5)), 
+          R + theme(plot.margin = margin(r = 5, l = 5, t = 5, b = 5)), 
+          S + theme(plot.margin = margin(r = 5, l = 5, t = 5, b = 5)), 
           labels = c("(A)", "(B)", "(C)", "(D)"), font.label = list(size = 16))
 require(gridExtra)
 PTRS <- grid.arrange(P, T, R, S, ncol=2, nrow=2, 
