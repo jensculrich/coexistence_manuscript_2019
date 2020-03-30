@@ -1,5 +1,5 @@
 # this file generates predicted fecundities based on plant trait measurements
-# and analyzes relationships between fecundity and hetero-/con-specific densities
+# and analyzes relationships between fecundity and environment
 
 library(tidyverse)
 library(stats4)
@@ -85,21 +85,18 @@ P_m5.2 <- glm.nb(num_seeds ~ plant_height,
                  data = traits)
 summary(P_m5.2)
 
-df_PLCO2 <- df_PLCO %>%
+df_PLCO <- df_PLCO %>%
   mutate(num_seeds2 = 12.41195 + 1.03474*plant_height) 
 ## when using predict it was taking exp(coefficient*value) rather than exp(coefficient)*value
 ## so I manually computed seeds (num_seeds2) by multiply each value by exp(coefficient)
 
 abundances$subplot_id<- 1:nrow(abundances) 
-fitness_and_abundances_PLCO <- inner_join(df_PLCO2, abundances)
+fitness_and_abundances_PLCO <- inner_join(df_PLCO, abundances)
 fitness_and_abundances_PLCO[fitness_and_abundances_PLCO == "-"] <- NA
 fitness_and_abundances_PLCO[fitness_and_abundances_PLCO == ""] <- NA
 
 str(fitness_and_abundances_PLCO)
 
-### remove the big outlier from the data set (many more seeds preditced vs any other plot)
-which.max(fitness_and_abundances_PLCO$num_seeds2)
-fitness_and_abundances_PLCO2 <- fitness_and_abundances_PLCO[-308, ]
 
 ##########################
 ##########################
@@ -113,11 +110,11 @@ fitness_and_abundances_VALO <- read.csv("fitness_and_abundances_VALO.csv")
 # Grass Cover 
 
 m6 <- lme(num_seeds2 ~  as.numeric(X.grasscover.1m.2), 
-          data = fitness_and_abundances_PLCO2, random=~1|Site,  na.action=na.omit) 
+          data = fitness_and_abundances_PLCO, random=~1|Site,  na.action=na.omit) 
 summary(m6) # X.grasscover.1m.2 is significant (positive)
 ## intercept is significant = 34.82207
 m6.1 <- lme(num_seeds2 ~  as.numeric(X.grasscover.1m.2), 
-            data = fitness_and_abundances_VALO2, random=~1|Site,  na.action=na.omit) 
+            data = fitness_and_abundances_VALO, random=~1|Site,  na.action=na.omit) 
 summary(m6.1) # X.grasscover.1m.2 is significant (positive)
 ## intercept is significant = 34.82207
 anova(m6)
@@ -162,12 +159,12 @@ V
 
 
 m7 <- lme(num_seeds2 ~  as.numeric(X.grasscover.subplot), 
-          data = fitness_and_abundances_PLCO2,random=~1|Site,  na.action=na.omit) 
+          data = fitness_and_abundances_PLCO,random=~1|Site,  na.action=na.omit) 
 summary(m7) # X.grasscover.subplot is minorly significant (positive)
 ## intercept is significant =
 anova(m7)
 m7.1 <- lm(num_seeds2 ~  as.numeric(X.grasscover.subplot), 
-           data = fitness_and_abundances_VALO2) 
+           data = fitness_and_abundances_VALO) 
 summary(m7.1) # X.grasscover.subplot is minorly significant (positive)
 ## intercept is significant =
 
@@ -175,54 +172,46 @@ summary(m7.1) # X.grasscover.subplot is minorly significant (positive)
 #######
 # edit data frame for soil moisture. 
 
-fitness_and_abundances_PLCO2[fitness_and_abundances_PLCO2 == "#DIV/0!"] <- NA
-fitness_and_abundances_VALO2[fitness_and_abundances_VALO2 == "#DIV/0!"] <- NA
+fitness_and_abundances_PLCO[fitness_and_abundances_PLCO == "#DIV/0!"] <- NA
+fitness_and_abundances_VALO[fitness_and_abundances_VALO == "#DIV/0!"] <- NA
 fitness_and_abundances[fitness_and_abundances == "#DIV/0!"] <- NA
-#fitness_and_abundances_PLCO3 <- fitness_and_abundances_PLCO2[!is.na(fitness_and_abundances_PLCO2$avg_soil_moisture_7.6cm),]
-fitness_and_abundances_PLCO2$avg_soil_moisture_7.6cm <- unfactor(fitness_and_abundances_PLCO2$avg_soil_moisture_7.6cm)
-class(fitness_and_abundances_PLCO2$avg_soil_moisture_7.6cm) 
-fitness_and_abundances_VALO2$avg_soil_moisture_7.6cm <- unfactor(fitness_and_abundances_VALO2$avg_soil_moisture_7.6cm)
-class(fitness_and_abundances_VALO2$avg_soil_moisture_7.6cm) 
+#fitness_and_abundances_PLCO3 <- fitness_and_abundances_PLCO[!is.na(fitness_and_abundances_PLCO$avg_soil_moisture_7.6cm),]
+fitness_and_abundances_PLCO$avg_soil_moisture_7.6cm <- unfactor(fitness_and_abundances_PLCO$avg_soil_moisture_7.6cm)
+class(fitness_and_abundances_PLCO$avg_soil_moisture_7.6cm) 
+fitness_and_abundances_VALO$avg_soil_moisture_7.6cm <- unfactor(fitness_and_abundances_VALO$avg_soil_moisture_7.6cm)
+class(fitness_and_abundances_VALO$avg_soil_moisture_7.6cm) 
 fitness_and_abundances$avg_soil_moisture_7.6cm <- unfactor(fitness_and_abundances$avg_soil_moisture_7.6cm)
 class(fitness_and_abundances$avg_soil_moisture_7.6cm) 
 
 
-m8 <- lme(num_seeds2 ~ avg_soil_moisture_7.6cm, 
-          data = fitness_and_abundances_PLCO2, random=~1|Site,  na.action=na.omit) 
+m8 <- glmer.nb(num_seeds2 ~ avg_soil_moisture_7.6cm + (1|Transect),
+               control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)),
+          data = fitness_and_abundances_PLCO,  na.action=na.omit) 
 summary(m8) # (avg_soil_moisture_7.6cm) is not significant
-## intercept is significant = exp(3.417535)
 anova(m8)
+
 m8.1 <- lme(num_seeds2 ~ 1, 
-            data = fitness_and_abundances_PLCO2, random=~1|Site,  na.action=na.omit) 
-summary(m8.1) # (avg_soil_moisture_7.6cm) is not significant
-## intercept is significant = exp(3.61964)
+            data = fitness_and_abundances_PLCO, random=~1|Transect,  na.action=na.omit) 
+summary(m8.1)
 
-m8.2 <- lme(num_seeds2 ~ avg_soil_moisture_7.6cm, 
-            data = fitness_and_abundances_VALO2, random=~1|Site,  na.action=na.omit) 
+m8.2 <- glmer.nb(num_seeds2 ~ avg_soil_moisture_7.6cm + (1|Transect), 
+            data = fitness_and_abundances_VALO,  na.action=na.omit) 
 summary(m8.2) # (soil.moisture.1.7.6cm) is not significant
-## intercept is significant = exp(3.488580)
 anova(m8.2)
+
 m8.3 <- lme(num_seeds2 ~ 1, 
-            data = fitness_and_abundances_VALO2, random=~1|Site,  na.action=na.omit) 
+            data = fitness_and_abundances_VALO, random=~1|Transect,  na.action=na.omit) 
 summary(m8.3) # (soil.moisture.1.7.6cm) is not significant
-## intercept is significant = exp(3.54669)
 
-newdat <- data.frame(avg_soil_moisture_7.6cm <- seq(5, 27, .25))
-newdat$y <- exp(3.61964) 
-newdat$Species = "Plectritis"
-
-newdat2 <- data.frame(avg_soil_moisture_7.6cm <- seq(5, 27, .25))
-newdat2$y <- exp(3.54669) 
-newdat2$Species = "Valerianella"
 
 X <- ggplot(data = fitness_and_abundances, aes(x = as.numeric(avg_soil_moisture_7.6cm),
                                                y = num_seeds2))
 X <- X + geom_point(size = 2, alpha = 0.7, aes(shape = Species))
-X <- X + geom_line(data = newdat, aes(x = avg_soil_moisture_7.6cm, y = y, color = Species), size = 1)
-X <- X + geom_line(data = newdat2, aes(x = avg_soil_moisture_7.6cm, y = y, color = Species), size = 1, linetype = "dashed")
+X <- X + geom_segment(aes(x=0,xend=30,y=38,yend=38), color ="black", size = 1)
+X <- X + geom_segment(aes(x=0,xend=30,y=34.59,yend=34.59), color ="black", size = 1, linetype = "dashed")
 X <- X + theme_bw() + 
   theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
-  theme(legend.title=element_text()) + labs(x="Soil moisture at 7.6 cm depth (%VWC)", y="Predicted seeds per plant") +
+  theme(legend.title=element_text()) + labs(x="Soil moisture 7.6 cm depth (%VWC)", y="Seeds / plant") +
   theme(legend.position="none")
 X <- X + scale_color_manual(values=c("black", "black"))
 X <- X + scale_shape_manual(values=c(19,1))
@@ -241,53 +230,45 @@ X <- X + theme(axis.title.x = element_text(vjust = 0,
                axis.text.y = element_text(size = 20))
 X <- X + theme(plot.title = element_text(size = 20, face = "bold"))
 X <- X + theme(axis.line = element_line(colour = 'black', size = 1))
+X <- X + ggtitle("(A)")
 X
 
 # edit data frame further for deep soil moisture. 
-fitness_and_abundances_PLCO2$avg_soil_moisture_12cm <- unfactor(fitness_and_abundances_PLCO2$avg_soil_moisture_12cm)
-class(fitness_and_abundances_PLCO2$avg_soil_moisture_12cm) 
-fitness_and_abundances_VALO2$avg_soil_moisture_12cm <- unfactor(fitness_and_abundances_VALO2$avg_soil_moisture_12cm)
-class(fitness_and_abundances_VALO2$avg_soil_moisture_12cm) 
+fitness_and_abundances_PLCO$avg_soil_moisture_12cm <- unfactor(fitness_and_abundances_PLCO$avg_soil_moisture_12cm)
+class(fitness_and_abundances_PLCO$avg_soil_moisture_12cm) 
+fitness_and_abundances_VALO$avg_soil_moisture_12cm <- unfactor(fitness_and_abundances_VALO$avg_soil_moisture_12cm)
+class(fitness_and_abundances_VALO$avg_soil_moisture_12cm) 
 fitness_and_abundances$avg_soil_moisture_12cm <- unfactor(fitness_and_abundances$avg_soil_moisture_12cm)
 class(fitness_and_abundances$avg_soil_moisture_12cm) 
 
-m9 <- lme(num_seeds2 ~ avg_soil_moisture_12cm, 
-          data = fitness_and_abundances_PLCO2, random=~1|Site,  na.action=na.omit) 
+m9 <- glmer.nb(num_seeds2 ~ avg_soil_moisture_12cm + (1|Transect), 
+          data = fitness_and_abundances_PLCO,  na.action=na.omit) 
 summary(m9) # (avg_soil_moisture_7.6cm) is not significant
-## intercept is significant = exp(3.417535)
 anova(m9)
+
 m9.1 <- lme(num_seeds2 ~ 1, 
-            data = fitness_and_abundances_PLCO2, random=~1|Site,  na.action=na.omit) 
-summary(m9.1) # (avg_soil_moisture_7.6cm) is not significant
-## intercept is significant = exp(3.61964)
+            data = fitness_and_abundances_PLCO, random=~1|Transect,  na.action=na.omit) 
+summary(m9.1) 
 
-m9.2 <- lme(num_seeds2 ~ avg_soil_moisture_12cm, 
-            data = fitness_and_abundances_VALO2, random=~1|Site,  na.action=na.omit) 
-summary(m9.2) # (soil.moisture.1.7.6cm) is not significant
-## intercept is significant = exp(3.488580)
+
+m9.2 <- glmer.nb(num_seeds2 ~ avg_soil_moisture_12cm + (1|Transect), 
+            data = fitness_and_abundances_VALO,  na.action=na.omit) 
+summary(m9.2) # (soil.moisture.12cm) is not significant
 anova(m9.2)
+
 m9.3 <- lme(num_seeds2 ~ 1, 
-            data = fitness_and_abundances_VALO2, random=~1|Site,  na.action=na.omit) 
-summary(m9.3) # (soil.moisture.1.7.6cm) is not significant
-## intercept is significant = exp(3.54669)
-
-newdat <- data.frame(avg_soil_moisture_12cm <- seq(15, 32, .25))
-newdat$y <- exp(3.61964) 
-newdat$Species = "Plectritis"
-
-newdat2 <- data.frame(avg_soil_moisture_12cm <- seq(15, 32, .25))
-newdat2$y <- exp(3.54669) 
-newdat2$Species = "Valerianella"
+            data = fitness_and_abundances_VALO, random=~1|Transect,  na.action=na.omit) 
+summary(m9.3) 
 
 
 Y <- ggplot(data = fitness_and_abundances, aes(x = as.numeric(avg_soil_moisture_12cm),
                                                y = num_seeds2))
 Y <- Y + geom_point(size = 2, alpha = 0.7, aes(shape = Species))
-Y <- Y + geom_line(data = newdat, aes(x = avg_soil_moisture_12cm, y = y), size = 1)
-Y <- Y + geom_line(data = newdat2, aes(x = avg_soil_moisture_12cm, y = y), size = 1, linetype = "dashed")
+Y <- Y + geom_segment(aes(x=0,xend=40,y=38,yend=38), color ="black", size = 1)
+Y <- Y + geom_segment(aes(x=0,xend=40,y=34.59,yend=34.59), color ="black", size = 1, linetype = "dashed")
 Y <- Y + theme_bw() + 
   theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
-  theme(legend.title=element_text()) + labs(x="Soil moisture at 12 cm depth (%VWC)", y="Predicted seeds per plant") +
+  theme(legend.title=element_text()) + labs(x="Soil moisture 12 cm depth (%VWC)", y="Seeds / plant") +
   theme(legend.position="none")
 Y <- Y + scale_color_manual(values=c("black", "black"))
 Y <- Y + scale_shape_manual(values=c(1, 19))
@@ -306,6 +287,7 @@ Y <- Y + theme(axis.title.x = element_text(vjust = 0,
                axis.text.y = element_text(size = 20))
 Y <- Y + theme(plot.title = element_text(size = 20, face = "bold"))
 Y <- Y + theme(axis.line = element_line(colour = 'black', size = 1))
+Y <- Y + ggtitle("(B)")
 Y
 
 
@@ -314,21 +296,33 @@ Y
 
 # soil with depth  less than 12 v greater than 12
 fitness_and_abundances_temp2 <- fitness_and_abundances
-PLCO_temp2 <- fitness_and_abundances_PLCO2
-VALO_temp2 <- fitness_and_abundances_VALO2
+PLCO_temp <- fitness_and_abundances_PLCO
+VALO_temp <- fitness_and_abundances_VALO
 fitness_and_abundances_temp2$soil.depth.1 <- revalue(fitness_and_abundances_temp2$soil.depth.1, c("<7"="<12cm", "7<x<12"="<12cm", ">12"=">12cm"))
-PLCO_temp2$soil.depth.1 <- revalue(PLCO_temp2$soil.depth.1, c("<7"="<12cm", "7<x<12"="<12cm", ">12"=">12cm"))
-VALO_temp2$soil.depth.1 <- revalue(VALO_temp2$soil.depth.1, c("<7"="<12cm", "7<x<12"="<12cm", ">12"=">12cm"))
+PLCO_temp$soil.depth.1 <- revalue(PLCO_temp$soil.depth.1, c("<7"="<12cm", "7<x<12"="<12cm", ">12"=">12cm"))
+VALO_temp$soil.depth.1 <- revalue(VALO_temp$soil.depth.1, c("<7"="<12cm", "7<x<12"="<12cm", ">12"=">12cm"))
 
 
 m11 <- lme(num_seeds2 ~ soil.depth.1, 
-           data = PLCO_temp2, random=~1|Site,  na.action=na.omit) 
+           data = PLCO_temp, random=~1|Transect,  na.action=na.omit) 
 summary(m11)
 anova(m11)
+
 m11.1 <- lme(num_seeds2 ~ soil.depth.1, 
-             data = VALO_temp2, random=~1|Site,  na.action=na.omit) 
+             data = VALO_temp, random=~1|Transect,  na.action=na.omit) 
 summary(m11.1)
 anova(m11.1)
+
+m11.2 <- glmer.nb(num_seeds2 ~ soil.depth.1 + (1|Transect), 
+             data = PLCO_temp,  na.action=na.omit) 
+summary(m11.2)
+anova(m11.2)
+
+m11.3 <- glmer.nb(num_seeds2 ~ soil.depth.1 + (1|Transect), 
+                  data = VALO_temp,  na.action=na.omit) 
+summary(m11.3)
+anova(m11.3)
+
 
 #order <- c("<7", "7<x<12", ">12")
 
@@ -338,7 +332,7 @@ Z <- Z + geom_boxplot(lwd=1)
 #  scale_x_discrete(limits=order)
 Z <- Z + theme_bw() + 
   theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
-  theme(legend.title=element_text()) + labs(x="soil depth", y="Predicted seeds per plant") +
+  theme(legend.title=element_text()) + labs(x="soil depth", y="Seeds / plant") +
   theme(legend.position="none")
 Z <- Z + scale_color_manual(values=c("black", "grey"))
 Z <- Z + theme(axis.line = element_line(size = 2))
@@ -356,6 +350,7 @@ Z <- Z + theme(axis.title.x = element_text(vjust = 0,
                axis.text.y = element_text(size = 20))
 Z <- Z + theme(plot.title = element_text(size = 20, face = "bold"))
 Z <- Z + theme(axis.line = element_line(colour = 'black', size = 1))
+Z <- Z + ggtitle("(A)")
 Z
 
 ############
@@ -363,12 +358,13 @@ Z
 
 
 require(gridExtra)
-grid.arrange(V, Z, X, Y, ncol=2, nrow=2, 
+grid.arrange(X, Y, Z, ncol=1, nrow=3, 
              top=textGrob("", gp=gpar(fontsize=20,font=7))
 )
 
-ggarrange(V + theme(plot.margin = margin(r = 10, l = 10, t = 60, b = 10)), 
+ggarrange(#V + theme(plot.margin = margin(r = 10, l = 10, t = 60, b = 10)), 
           Z + theme(plot.margin = margin(r = 10, l = 10, t = 60, b = 10)), 
           X + theme(plot.margin = margin(r = 10, l = 10, t = 60, b = 10)), 
           Y + theme(plot.margin = margin(r = 10, l = 10, t = 60, b = 10)), 
           labels = c("(A)", "(B)", "(C)", "(D)"), font.label = list(size = 20))
+
