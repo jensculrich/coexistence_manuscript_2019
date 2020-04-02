@@ -109,16 +109,13 @@ fitness_and_abundances_VALO <- read.csv("fitness_and_abundances_VALO.csv")
 #################
 # Grass Cover 
 
-m6 <- lme(num_seeds2 ~  as.numeric(X.grasscover.1m.2), 
-          data = fitness_and_abundances_PLCO, random=~1|Site,  na.action=na.omit) 
-summary(m6) # X.grasscover.1m.2 is significant (positive)
-## intercept is significant = 34.82207
-m6.1 <- lme(num_seeds2 ~  as.numeric(X.grasscover.1m.2), 
-            data = fitness_and_abundances_VALO, random=~1|Site,  na.action=na.omit) 
-summary(m6.1) # X.grasscover.1m.2 is significant (positive)
-## intercept is significant = 34.82207
-anova(m6)
-anova(m6.1)
+#m6 <- lme(num_seeds2 ~  as.numeric(X.grasscover.1m.2), 
+#          data = fitness_and_abundances_PLCO, random=~1|Site,  na.action=na.omit) 
+#summary(m6) # 
+#m6.1 <- lme(num_seeds2 ~  as.numeric(X.grasscover.1m.2), 
+#            data = fitness_and_abundances_VALO, random=~1|Site,  na.action=na.omit) 
+#summary(m6.1) # 
+
 
 ## newdat PLCO
 newdat <- data.frame(X.grasscover.1m.2 <- seq(0, 100, 1))
@@ -183,25 +180,29 @@ class(fitness_and_abundances_VALO$avg_soil_moisture_7.6cm)
 fitness_and_abundances$avg_soil_moisture_7.6cm <- unfactor(fitness_and_abundances$avg_soil_moisture_7.6cm)
 class(fitness_and_abundances$avg_soil_moisture_7.6cm) 
 
+m8.0 <- glmer.nb(num_seeds2 ~ avg_soil_moisture_7.6cm + (1|Transect),
+               data = fitness_and_abundances_PLCO,  na.action=na.omit) 
 
 m8 <- glmer.nb(num_seeds2 ~ avg_soil_moisture_7.6cm + (1|Transect),
-               control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)),
-          data = fitness_and_abundances_PLCO,  na.action=na.omit) 
+          data = na.omit(fitness_and_abundances_PLCO[ , all.vars(formula(m8.0))]),  na.action=na.omit) 
 summary(m8) # (avg_soil_moisture_7.6cm) is not significant
-anova(m8)
 
-m8.1 <- lme(num_seeds2 ~ 1, 
-            data = fitness_and_abundances_PLCO, random=~1|Transect,  na.action=na.omit) 
+m8.1 <- glmer.nb(num_seeds2 ~ (1|Transect), 
+            data = na.omit(fitness_and_abundances_PLCO[ , all.vars(formula(m8.0))]), na.action=na.omit) 
 summary(m8.1)
+anova(m8, m8.1, test = "LRT")
+
+m8.0.2 <- glmer.nb(num_seeds2 ~ avg_soil_moisture_7.6cm + (1|Transect), 
+                 data = fitness_and_abundances_VALO,  na.action=na.omit) 
 
 m8.2 <- glmer.nb(num_seeds2 ~ avg_soil_moisture_7.6cm + (1|Transect), 
-            data = fitness_and_abundances_VALO,  na.action=na.omit) 
+            data = na.omit(fitness_and_abundances_VALO[ , all.vars(formula(m8.0.2))]),  na.action=na.omit) 
 summary(m8.2) # (soil.moisture.1.7.6cm) is not significant
-anova(m8.2)
 
-m8.3 <- lme(num_seeds2 ~ 1, 
-            data = fitness_and_abundances_VALO, random=~1|Transect,  na.action=na.omit) 
+m8.3 <- glmer.nb(num_seeds2 ~ (1|Transect), 
+            data = na.omit(fitness_and_abundances_VALO[ , all.vars(formula(m8.0.2))]),  na.action=na.omit) 
 summary(m8.3) # (soil.moisture.1.7.6cm) is not significant
+anova(m8.2, m8.3, test = "LRT")
 
 
 X <- ggplot(data = fitness_and_abundances, aes(x = as.numeric(avg_soil_moisture_7.6cm),
@@ -241,24 +242,33 @@ class(fitness_and_abundances_VALO$avg_soil_moisture_12cm)
 fitness_and_abundances$avg_soil_moisture_12cm <- unfactor(fitness_and_abundances$avg_soil_moisture_12cm)
 class(fitness_and_abundances$avg_soil_moisture_12cm) 
 
-m9 <- glmer.nb(num_seeds2 ~ avg_soil_moisture_12cm + (1|Transect), 
+m9.0 <- glmer.nb(num_seeds2 ~ avg_soil_moisture_12cm + (1|Transect), 
           data = fitness_and_abundances_PLCO,  na.action=na.omit) 
 summary(m9) # (avg_soil_moisture_7.6cm) is not significant
-anova(m9)
 
-m9.1 <- lme(num_seeds2 ~ 1, 
-            data = fitness_and_abundances_PLCO, random=~1|Transect,  na.action=na.omit) 
-summary(m9.1) 
+m9 <- glmer.nb(num_seeds2 ~ avg_soil_moisture_12cm + (1|Transect), 
+                 data = na.omit(fitness_and_abundances_PLCO[ , all.vars(formula(m9.0))]),  na.action=na.omit) 
+summary(m9) # (avg_soil_moisture_7.6cm) is not significant
 
+m9.1 <- glmer.nb(num_seeds2 ~ (1|Transect), 
+            data = na.omit(fitness_and_abundances_PLCO[ , all.vars(formula(m9.0))]),  na.action=na.omit) 
+summary(m9.1)
+
+anova(m9, m9.1, test = "LRT")
+
+m9.0.2 <- glmer.nb(num_seeds2 ~ avg_soil_moisture_12cm + (1|Transect), 
+                 data = fitness_and_abundances_VALO,  na.action=na.omit) 
 
 m9.2 <- glmer.nb(num_seeds2 ~ avg_soil_moisture_12cm + (1|Transect), 
-            data = fitness_and_abundances_VALO,  na.action=na.omit) 
+            data = na.omit(fitness_and_abundances_VALO[ , all.vars(formula(m9.0.2))]),  na.action=na.omit) 
 summary(m9.2) # (soil.moisture.12cm) is not significant
-anova(m9.2)
 
-m9.3 <- lme(num_seeds2 ~ 1, 
-            data = fitness_and_abundances_VALO, random=~1|Transect,  na.action=na.omit) 
+
+m9.3 <- glmer.nb(num_seeds2 ~ (1|Transect), 
+            data = na.omit(fitness_and_abundances_VALO[ , all.vars(formula(m9.0.2))]),  na.action=na.omit) 
 summary(m9.3) 
+
+anova(m9.2, m9.3, test = "LRT")
 
 
 Y <- ggplot(data = fitness_and_abundances, aes(x = as.numeric(avg_soil_moisture_12cm),
@@ -303,25 +313,32 @@ PLCO_temp$soil.depth.1 <- revalue(PLCO_temp$soil.depth.1, c("<7"="<12cm", "7<x<1
 VALO_temp$soil.depth.1 <- revalue(VALO_temp$soil.depth.1, c("<7"="<12cm", "7<x<12"="<12cm", ">12"=">12cm"))
 
 
-m11 <- lme(num_seeds2 ~ soil.depth.1, 
-           data = PLCO_temp, random=~1|Transect,  na.action=na.omit) 
-summary(m11)
-anova(m11)
-
-m11.1 <- lme(num_seeds2 ~ soil.depth.1, 
-             data = VALO_temp, random=~1|Transect,  na.action=na.omit) 
-summary(m11.1)
-anova(m11.1)
-
-m11.2 <- glmer.nb(num_seeds2 ~ soil.depth.1 + (1|Transect), 
+m11.0 <- glmer.nb(num_seeds2 ~ soil.depth.1 + (1|Transect), 
              data = PLCO_temp,  na.action=na.omit) 
+
+
+m11.1 <- glmer.nb(num_seeds2 ~ soil.depth.1 + (1|Transect), 
+                  data = na.omit(PLCO_temp[ , all.vars(formula(m11.0))]),  na.action=na.omit) 
+summary(m11.1)
+
+m11.2 <- glmer.nb(num_seeds2 ~  (1|Transect), 
+                  data = na.omit(PLCO_temp[ , all.vars(formula(m11.0))]),  na.action=na.omit) 
 summary(m11.2)
-anova(m11.2)
+
+anova(m11.1, m11.2, test = "LRT")
+
+m11.0.2 <- glmer.nb(num_seeds2 ~ soil.depth.1 + (1|Transect), 
+                  data = VALO_temp,  na.action=na.omit) 
 
 m11.3 <- glmer.nb(num_seeds2 ~ soil.depth.1 + (1|Transect), 
-                  data = VALO_temp,  na.action=na.omit) 
+                  data = na.omit(VALO_temp[ , all.vars(formula(m11.0.2))]),  na.action=na.omit) 
 summary(m11.3)
-anova(m11.3)
+
+m11.4 <- glmer.nb(num_seeds2 ~ (1|Transect), 
+                  data = na.omit(VALO_temp[ , all.vars(formula(m11.0.2))]),  na.action=na.omit) 
+summary(m11.4)
+
+anova(m11.3, m11.4, test = "LRT")
 
 
 #order <- c("<7", "7<x<12", ">12")
