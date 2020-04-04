@@ -58,11 +58,6 @@ x <- subset_SEEDS$background_density
 attach(subset_SEEDS)
 mu <- function(p) p[1]/(1+p[2]*background_density)
 m2_PLCO_aii_drought <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(380,0.22), pshape=1)
-# sd = se x sqrt(n)
-# se = 42.51
-# n = 43
-stdev = 42.51*sqrt(43)
-rand = rnorm(n=1, mean=364.2, sd=stdev)
 ```
 
 # aij
