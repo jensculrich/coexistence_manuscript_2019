@@ -15,6 +15,7 @@ library(purrr)
 library(repurrrsive)
 library(listviewer)
 library(gnlm)
+library(rsample)
 library(propagate)
 ```
 
@@ -24,21 +25,11 @@ library(propagate)
 list.files()
 SEEDS <- read.csv("Seed_Counts.csv")
 SEEDS <- SEEDS %>% drop_na(num_seeds)
-# View(SEEDS)
-SEEDS <- select(SEEDS, num_seeds, focal_species, background_species, background_density, treatment)
-View(SEEDS)
-# subset_SEEDS <- filter(SEEDS, focal_species == "PLCO", background_species == "PLCO" | background_species == "none", treatment == "Drought-stressed")
+
 
 ## germination values are assumed to be global, not affected by treatment or seeding densities
 germination_i = 0.670
 germination_j = 0.891
-
-## used maximum likelihood method to estimate parameters
-## We then used gnlr (function
-## ''gnlr,'' method ''L-BFGS-B,'' and negative binomial error
-## structure [R Development Core Team 2011]) to fit both
-## lambda and alpha values (bounded to be positive) according to the function
-
 ```
 
 #### Estimate parameters in dry treatment conditions
@@ -51,13 +42,33 @@ subset_SEEDS <- filter(SEEDS, focal_species == "PLCO", background_species == "PL
 
 #m2_PLCO_aii_drought <- nls(num_seeds~lambda/(1+alpha*germination_i*background_density), data=subset_SEEDS, start=list(lambda=380, alpha=0.22))
 #y <- subset_SEEDS$num_seeds*germination_i
-x <- subset_SEEDS$background_density
+#x <- subset_SEEDS$background_density
 
-#summary(m2_PLCO_aii_drought)
-#confint(m2_PLCO_aii_drought) 
 attach(subset_SEEDS)
 mu <- function(p) p[1]/(1+p[2]*background_density)
 m2_PLCO_aii_drought <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(380,0.22), pshape=1)
+
+# Bootstrap 
+library(boot)
+# function to obtain p1 from the data
+p1 <- function(formula, data, indices) {
+  d <- sample_n(data, 30) # allows boot to select sample
+  attach(d)
+  fit <- gnlr(num_seeds, dist="negative binomial", mu=formula, pmu=c(400,0.50), pshape=1)
+  return(fit[[18]][1])
+}
+
+# bootstrapping with 1000 replications
+results <- boot(data=subset_SEEDS, p1,
+   R=500, formula=mu)
+
+# view results
+results
+plot(results)
+
+# get 95% confidence interval
+boot.ci(results, type="bca")
+
 ```
 
 # aij
