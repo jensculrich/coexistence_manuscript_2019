@@ -56,15 +56,14 @@ mu <- function(p) p[1]/(1+p[2]*background_density)
 # function to obtain p1 from the data
 p1 <- function(formula, data, indices) {
   d <- sample_n(data, 30) # allows boot to select sample
-  attach(d)
-  fit <- gnlr(num_seeds, dist="negative binomial", mu=formula, pmu=c(400,0.50), pshape=1)
+  fit <- gnlr(d$num_seeds, dist="negative binomial", mu=formula, pmu=c(400,0.50), pshape=1)
   return(fit[[18]][1])
 }
 
 # bootstrapping with 1000 replications
-set.seed(1234)
+set.seed(123)
 results_lambda_i_dry <- boot(data=subset_SEEDS, p1,
-   R=30, formula=mu)
+   R=1000, formula=mu)
 
 # view results
 results_lambda_i_dry
