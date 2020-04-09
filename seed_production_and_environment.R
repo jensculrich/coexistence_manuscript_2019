@@ -12,6 +12,7 @@ library(repurrrsive)
 library(listviewer)
 library(varhandle)
 library(plyr)
+library(lme4)
 
 # generate predicted fecundities
 ############
@@ -179,6 +180,8 @@ fitness_and_abundances_VALO$avg_soil_moisture_7.6cm <- unfactor(fitness_and_abun
 class(fitness_and_abundances_VALO$avg_soil_moisture_7.6cm) 
 fitness_and_abundances$avg_soil_moisture_7.6cm <- unfactor(fitness_and_abundances$avg_soil_moisture_7.6cm)
 class(fitness_and_abundances$avg_soil_moisture_7.6cm) 
+
+
 
 m8.0 <- glmer.nb(num_seeds2 ~ avg_soil_moisture_7.6cm + (1|Transect),
                data = fitness_and_abundances_PLCO,  na.action=na.omit) 
