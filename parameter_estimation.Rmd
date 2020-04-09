@@ -565,7 +565,7 @@ lambda_v <- c(327.4, 24.8)
 alpha_pv <- c(0.27, 0.09)
 alpha_vp <- c(0.42, 0.04)
 alpha_pp <- c(0.37, 0.06)
-alpha_vv <- c(0.47, 0.14)
+alpha_vv <- c(0.47, 0.06)
 
 germination_p = c(0.670, 0)
 germination_v = c(0.891, 0)
