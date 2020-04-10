@@ -99,8 +99,8 @@ P <- P + geom_line(data = newdata, aes(x = X.Plectritis..including.pollinator.fo
 P <- P + geom_segment(aes(x=0,xend=110,y=37.1,yend=37.1), color ="black", size = 1)
 P <- P + theme_bw() + theme(plot.title = element_text(hjust = 0), 
                             panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
-  theme(legend.position = c(.8, .8), legend.title=element_text()) + 
-  labs(x=expression(paste("Plectritis / 0.1", m^2)), y="Seeds / plant")
+  theme(legend.position = "none", legend.title=element_text()) + 
+  labs(x=expression(paste("P. congesta / 0.1", m^2)), y="Seeds / plant")
 P <- P + scale_color_manual(values=c("black", "black"))
 P <- P + scale_shape_manual(values=c(19, 1))
 P <- P + theme(axis.line = element_line(size = 2))
@@ -159,7 +159,7 @@ T <- T + geom_segment(aes(x=0,xend=50,y=37.1,yend=37.1), color ="black", size = 
 T <- T + geom_segment(aes(x=0,xend=50,y=34.3,yend=34.3), color = "black", linetype = "dashed", size = 1)
 T <- T + theme_bw() + 
   theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
-  theme(legend.title=element_text()) + labs(x=expression(paste("Valerianella / (0.1", m^2, ")")), y="Seeds / plant") +
+  theme(legend.title=element_text()) + labs(x=expression(paste("V. locusta / (0.1", m^2, ")")), y="Seeds / plant") +
   theme(legend.position="none")
 T <- T + scale_shape_manual(values=c(19, 1))
 T <- T + scale_color_manual(values=c("black", "black"))
@@ -228,7 +228,7 @@ R <- R + geom_line(data = newdata3, aes(x = X.Plectritis..including.pollinator.f
 R <- R + theme_bw() + theme(plot.title = element_text(hjust = 0), 
                             panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
   theme(legend.position = c(.66, .7), legend.title=element_text()) + 
-  labs(x=expression(paste("Plectritis / 0.1", m^2)), y=expression(paste("Valerianella / 0.1", m^2)))
+  labs(x=expression(paste("P. congesta / 0.1", m^2)), y=expression(paste("V. locusta / 0.1", m^2)))
 R <- R + scale_color_manual(values=c("black", "black"))
 R <- R + scale_shape_manual(values=c(1, 16))
 R <- R + theme(axis.line = element_line(size = 2))
@@ -292,7 +292,7 @@ S <- S + geom_line(data = newdata4, aes(x = X.Plectritis.1m.2..including.subplot
 S <- S + theme_bw() + theme(plot.title = element_text(hjust = 0), 
                             panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
   theme(legend.position = "none", legend.title=element_blank()) + 
-  labs(x=expression(paste("Plectritis / 1", m^2)), y=expression(paste("Valerianella / 1", m^2)))
+  labs(x=expression(paste("P. congesta / 1", m^2)), y=expression(paste("V. locusta / 1", m^2)))
 S <- S + scale_color_manual(values=c("black", "black"))
 S <- S + scale_shape_manual(values=c(1, 16))
 S <- S + theme(axis.line = element_line(size = 2))
@@ -585,15 +585,20 @@ anova(m11.3, m11.4, test = "LRT")
 
 #order <- c("<7", "7<x<12", ">12")
 
-Z <- ggplot(data=subset(fitness_and_abundances_temp2, !is.na(soil.depth.1)), aes(x=soil.depth.1, y=num_seeds2, color=Species))
-Z <- Z + geom_boxplot(lwd=1)
-#Z <- Z + 
-#  scale_x_discrete(limits=order)
+
+fitness_and_abundances_temp3 <- fitness_and_abundances_temp2[!is.na(fitness_and_abundances_temp2$soil.depth.1),]
+fitness_and_abundances_temp3 <- na.omit(fitness_and_abundances_temp2)
+!is.na(fitness_and_abundances_temp2$soil.depth.1)
+
+Z <- ggerrorplot(fitness_and_abundances_temp3, x = "soil.depth.1", y = "num_seeds2", 
+                  desc_stat = "mean_se", color  = "Species", position = position_dodge(0.3) 
+)
 Z <- Z + theme_bw() + 
   theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
   theme(legend.title=element_text()) + labs(x="soil depth", y="Seeds / plant") +
   theme(legend.position="none")
 Z <- Z + scale_color_manual(values=c("black", "grey"))
+Z <- Z + scale_shape_manual(values=c(1, 19))
 Z <- Z + theme(axis.line = element_line(size = 2))
 Z <- Z + theme(axis.title.x = element_text(vjust = 0,
                                            size = 20),
@@ -610,8 +615,10 @@ Z <- Z + theme(axis.title.x = element_text(vjust = 0,
 Z <- Z + theme(plot.title = element_text(size = 20, face = "bold"))
 Z <- Z + theme(axis.line = element_line(colour = 'black', size = 1))
 Z <- Z + ggtitle("(E)")
-Z
 
+Z  
+  
+ 
 ############
 ############
 

@@ -832,6 +832,7 @@ E <- E + geom_hline(yintercept= 1, linetype="dashed",
 E <- E + theme(legend.position = c(0.75, 0.9))
 E <- E + coord_fixed(ratio = 0.45)
 E <- E + theme(axis.line = element_line(colour = 'black', size = 1))
+E <- E + scale_x_discrete(labels = c('P. congesta','V. locusta'))
 E
 ```
 
