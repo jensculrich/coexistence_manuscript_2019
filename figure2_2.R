@@ -250,6 +250,7 @@ R <- R + theme(legend.title=element_text(size=rel(1.5)))
 R <- R + coord_fixed(ratio = 1, xlim = NULL, ylim = NULL, expand = TRUE)
 R <- R + theme(axis.line = element_line(colour = 'black', size = 1))
 R <- R + geom_ribbon(data = newdata3, aes(ymin = LL, ymax = UL), alpha = .25)
+R <- R + ggtitle("(A)")
 R
 
 ##########
@@ -312,6 +313,7 @@ S <- S + theme(plot.title = element_text(size = 20, face = "bold"))
 S <- S + coord_fixed(ratio = 1.5, xlim = NULL, ylim = NULL, expand = TRUE)
 S <- S + theme(axis.line = element_line(colour = 'black', size = 1))
 S <- S + geom_ribbon(data = newdata4, aes(ymin = LL, ymax = UL), alpha = .25)
+S <- S + ggtitle("(B)")
 S
 
 ############
