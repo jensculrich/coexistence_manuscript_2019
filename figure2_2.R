@@ -121,7 +121,7 @@ P <- P + theme(axis.line = element_line(colour = 'black', size = 1))
 P <- P + geom_ribbon(data = newdata, aes(ymin = LL, ymax = UL), alpha = .25)
 P <- P + theme(legend.text=element_text(size=rel(1.5)))
 P <- P + theme(legend.title=element_text(size=rel(1.5)))
-P <- P + ggtitle("(A)")
+P <- P + ggtitle("(a)")
 P
 
 
@@ -178,7 +178,7 @@ T <- T + theme(axis.title.x = element_text(vjust = 0,
                axis.text.y = element_text(size = 16))
 T <- T + theme(plot.title = element_text(size = 20, face = "bold"))
 T <- T + theme(axis.line = element_line(colour = 'black', size = 1))
-T <- T + ggtitle("(B)")
+T <- T + ggtitle("(b)")
 T
 
 
@@ -250,7 +250,7 @@ R <- R + theme(legend.title=element_text(size=rel(1.5)))
 R <- R + coord_fixed(ratio = 1, xlim = NULL, ylim = NULL, expand = TRUE)
 R <- R + theme(axis.line = element_line(colour = 'black', size = 1))
 R <- R + geom_ribbon(data = newdata3, aes(ymin = LL, ymax = UL), alpha = .25)
-R <- R + ggtitle("(A)")
+R <- R + ggtitle("(a)")
 R
 
 ##########
@@ -313,7 +313,7 @@ S <- S + theme(plot.title = element_text(size = 20, face = "bold"))
 S <- S + coord_fixed(ratio = 1.5, xlim = NULL, ylim = NULL, expand = TRUE)
 S <- S + theme(axis.line = element_line(colour = 'black', size = 1))
 S <- S + geom_ribbon(data = newdata4, aes(ymin = LL, ymax = UL), alpha = .25)
-S <- S + ggtitle("(B)")
+S <- S + ggtitle("(b)")
 S
 
 ############
@@ -421,7 +421,9 @@ fitness_and_abundances_VALO$avg_soil_moisture_7.6cm <- unfactor(fitness_and_abun
 class(fitness_and_abundances_VALO$avg_soil_moisture_7.6cm) 
 fitness_and_abundances$avg_soil_moisture_7.6cm <- unfactor(fitness_and_abundances$avg_soil_moisture_7.6cm)
 class(fitness_and_abundances$avg_soil_moisture_7.6cm) 
-
+fitness_and_abundances$avg_soil_moisture_7.6cm <- as.numeric(as.character(fitness_and_abundances$avg_soil_moisture_7.6cm))
+fitness_and_abundances$avg_soil_moisture_12cm <- as.numeric(as.character(fitness_and_abundances$avg_soil_moisture_12cm))
+str(fitness_and_abundances)
 
 
 m8.0 <- glmer.nb(num_seeds2 ~ avg_soil_moisture_7.6cm + (1|Transect),
@@ -475,7 +477,7 @@ X <- X + theme(axis.title.x = element_text(vjust = 0,
                axis.text.y = element_text(size = 20))
 X <- X + theme(plot.title = element_text(size = 20, face = "bold"))
 X <- X + theme(axis.line = element_line(colour = 'black', size = 1))
-X <- X + ggtitle("(C)")
+X <- X + ggtitle("(c)")
 X
 
 # edit data frame further for deep soil moisture. 
@@ -525,7 +527,7 @@ Y <- Y + theme_bw() +
   theme(legend.title=element_text()) + labs(x="Soil moisture 12 cm depth (%VWC)", y="Seeds / plant") +
   theme(legend.position="none")
 Y <- Y + scale_color_manual(values=c("black", "black"))
-Y <- Y + scale_shape_manual(values=c(1, 19))
+Y <- Y + scale_shape_manual(values=c(19, 1))
 Y <- Y + theme(axis.line = element_line(size = 2))
 Y <- Y + theme(axis.title.x = element_text(vjust = 0,
                                            size = 20),
@@ -541,7 +543,7 @@ Y <- Y + theme(axis.title.x = element_text(vjust = 0,
                axis.text.y = element_text(size = 20))
 Y <- Y + theme(plot.title = element_text(size = 20, face = "bold"))
 Y <- Y + theme(axis.line = element_line(colour = 'black', size = 1))
-Y <- Y + ggtitle("(D)")
+Y <- Y + ggtitle("(d)")
 Y
 
 
@@ -585,12 +587,9 @@ summary(m11.4)
 anova(m11.3, m11.4, test = "LRT")
 
 
-#order <- c("<7", "7<x<12", ">12")
-
-
 fitness_and_abundances_temp3 <- fitness_and_abundances_temp2[!is.na(fitness_and_abundances_temp2$soil.depth.1),]
-fitness_and_abundances_temp3 <- na.omit(fitness_and_abundances_temp2)
-!is.na(fitness_and_abundances_temp2$soil.depth.1)
+#fitness_and_abundances_temp3 <- na.omit(fitness_and_abundances_temp2)
+#!is.na(fitness_and_abundances_temp2$soil.depth.1)
 
 Z <- ggerrorplot(fitness_and_abundances_temp3, x = "soil.depth.1", y = "num_seeds2", 
                   desc_stat = "mean_se", color  = "Species", position = position_dodge(0.3) 
@@ -616,7 +615,7 @@ Z <- Z + theme(axis.title.x = element_text(vjust = 0,
                axis.text.y = element_text(size = 20))
 Z <- Z + theme(plot.title = element_text(size = 20, face = "bold"))
 Z <- Z + theme(axis.line = element_line(colour = 'black', size = 1))
-Z <- Z + ggtitle("(E)")
+Z <- Z + ggtitle("(e)")
 
 Z  
   

@@ -117,6 +117,30 @@ fitness_and_abundances_VALO <- read.csv("fitness_and_abundances_VALO.csv")
 #            data = fitness_and_abundances_VALO, random=~1|Site,  na.action=na.omit) 
 #summary(m6.1) # 
 
+m6.0 <- glmer.nb(num_seeds2 ~ as.numeric(X.grasscover.1m.2) + (1|Transect),
+                 data = fitness_and_abundances_PLCO,  na.action=na.omit) 
+
+m6 <- glmer.nb(num_seeds2 ~ as.numeric(X.grasscover.1m.2) + (1|Transect),
+               data = na.omit(fitness_and_abundances_PLCO[ , all.vars(formula(m6.0))]),  na.action=na.omit) 
+summary(m6) # (avg_soil_moisture_7.6cm) is not significant
+
+m6.1 <- glmer.nb(num_seeds2 ~ (1|Transect), 
+                 data = na.omit(fitness_and_abundances_PLCO[ , all.vars(formula(m6.0))]), na.action=na.omit) 
+summary(m6.1)
+anova(m6, m6.1, test = "LRT")
+
+m7.0 <- glmer.nb(num_seeds2 ~ as.numeric(X.grasscover.1m.2) + (1|Transect),
+                 data = fitness_and_abundances_VALO,  na.action=na.omit) 
+
+m7 <- glmer.nb(num_seeds2 ~ as.numeric(X.grasscover.1m.2) + (1|Transect),
+               data = na.omit(fitness_and_abundances_VALO[ , all.vars(formula(m7.0))]),  na.action=na.omit) 
+summary(m7) # (avg_soil_moisture_7.6cm) is not significant
+
+m7.1 <- glmer.nb(num_seeds2 ~ (1|Transect), 
+                 data = na.omit(fitness_and_abundances_VALO[ , all.vars(formula(m7.0))]), na.action=na.omit) 
+summary(m7.1)
+anova(m7, m7.1, test = "LRT")
+
 
 ## newdat PLCO
 newdat <- data.frame(X.grasscover.1m.2 <- seq(0, 100, 1))
@@ -156,15 +180,6 @@ V <- V + theme(axis.line = element_line(colour = 'black', size = 1))
 V
 
 
-m7 <- lme(num_seeds2 ~  as.numeric(X.grasscover.subplot), 
-          data = fitness_and_abundances_PLCO,random=~1|Site,  na.action=na.omit) 
-summary(m7) # X.grasscover.subplot is minorly significant (positive)
-## intercept is significant =
-anova(m7)
-m7.1 <- lm(num_seeds2 ~  as.numeric(X.grasscover.subplot), 
-           data = fitness_and_abundances_VALO) 
-summary(m7.1) # X.grasscover.subplot is minorly significant (positive)
-## intercept is significant =
 
 
 #######
