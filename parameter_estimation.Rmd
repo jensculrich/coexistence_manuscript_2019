@@ -841,7 +841,7 @@ E
 
 ggarrange(T + theme(plot.margin = margin(r = 0, l = 0, t = 45, b = 25)), 
           E + theme(plot.margin = margin(r = 0, l = 20, t = 0, b = 0)), 
-          labels = c("(A)", "(B)"), font.label = list(size = 20))
+          labels = c("(a)", "(b)"), font.label = list(size = 20))
 
 ```
 
@@ -882,6 +882,7 @@ P <- P + theme(axis.title.x = element_text(size = 20),
                ),
                # Y axis text
                axis.text.y = element_text(size = 16))
+P <- P + theme(axis.line = element_line(size = 1))
 P
 
 #### (B) Plot VALO focals in dry
@@ -907,6 +908,7 @@ R <- R + theme(axis.title.x = element_text(size = 20),
                ),
                # Y axis text
                axis.text.y = element_text(size = 16))
+R <- R + theme(axis.line = element_line(size = 1))
 R
 
 ## Plot wet
@@ -941,6 +943,7 @@ Q <- Q + theme(axis.title.x = element_text(size = 20),
                ),
                # Y axis text
                axis.text.y = element_text(size = 16))
+Q <- Q + theme(axis.line = element_line(size = 1))
 Q
 
 ##### plot VALO focals in wet
@@ -966,6 +969,7 @@ S <- S + theme(axis.title.x = element_text(size = 20),
                ),
                # Y axis text
                axis.text.y = element_text(size = 16))
+S <- S + theme(axis.line = element_line(size = 1))
 S
 
 
@@ -980,5 +984,5 @@ ggarrange(P + theme(plot.margin = margin(r = 0, l = 20, t = 20, b = 0)),
           Q + theme(plot.margin = margin(r = 0, l = 20, t = 20, b = 0)), 
           R + theme(plot.margin = margin(r = 0, l = 20, t = 20, b = 0)), 
           S + theme(plot.margin = margin(r = 0, l = 20, t = 20, b = 0)),
-          labels = c("(A)", "(B)", "(C)", "(D)"), font.label = list(size = 20))
+          labels = c("(a)", "(b)", "(c)", "(d)"), font.label = list(size = 20))
 ```
