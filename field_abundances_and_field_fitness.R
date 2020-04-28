@@ -1,5 +1,6 @@
-# this file analyzes relationships between fecundity 
+# this file contains code to analyze relationships between fecundity 
 # and hetero-/con-specific densities
+# and between abundance and hetero/conspecific densities
 
 library(tidyverse)
 library(stats4)
@@ -45,8 +46,11 @@ fitness_and_abundances_PLCO2_filtered <- fitness_and_abundances_PLCO2 %>%
   filter(Site != "Thetis")
 
 
-#################
-## (plectritis fitness against plectritis density) with mixed effects glm.nb (glmer.nb)
+############################################################
+# Relationships between fecundity and competitor densities #
+############################################################
+
+# plectritis fitness against plectritis density with mixed effects glm.nb 
 str(fitness_and_abundances_PLCO2_filtered)
 
 mixed_m1 <- glmer.nb(num_seeds2 ~ X.Plectritis..including.pollinator.focal.plants. 
@@ -61,7 +65,7 @@ mixed_m2 <- glmer.nb(num_seeds2 ~ (1|Transect/Plot),
 summary(mixed_m2) # # Plectritis is non-significant
 anova(mixed_m1, mixed_m2, test = "LRT")
 
-## (valerianella fitness against plectritis density) with mixed effects glm.nb (glmer.nb)
+# valerianella fitness against plectritis density with mixed effects glm.nb 
 mixed_m3 <- glmer.nb(num_seeds2 ~ X.Plectritis..including.pollinator.focal.plants. 
                      + (1|Transect/Plot), 
                      data = fitness_and_abundances_VALO2_filtered, na.action=na.omit) 
@@ -74,9 +78,8 @@ summary(mixed_m4)
 anova(mixed_m4)
 anova(mixed_m3, mixed_m4, test = "LRT")
 
-
 #################
-## (plectritis fitness against valerianella density) with mixed effects glm.nb (glmer.nb)
+## plectritis fitness against valerianella density with mixed effects glm.nb 
 mixed_m5 <- glmer.nb(num_seeds2 ~ X.Valerianella 
                      + (1|Transect/Plot), 
                      data = fitness_and_abundances_PLCO2_filtered,  na.action=na.omit) 
@@ -88,7 +91,7 @@ mixed_m6 <- glmer.nb(num_seeds2 ~ (1|Transect/Plot),
 summary(mixed_m6) # singular boundary due to small capture ofvarianve by random effects
 anova(mixed_m5, mixed_m6, test = "LRT")
 
-## (plectritis fitness against valerianella density) with mixed effects glm.nb (glmer.nb)
+# plectritis fitness against valerianella density with mixed effects glm.nb 
 mixed_m7 <- glmer.nb(num_seeds2 ~ X.Valerianella 
                      + (1|Transect/Plot), 
                      data = fitness_and_abundances_VALO2_filtered,  na.action=na.omit) 
@@ -100,8 +103,10 @@ summary(mixed_m8)
 anova(mixed_m7, mixed_m8, test = "LRT")
 
 
-#############################################
-# analyze relationship between species abundances
+###################################################
+# analyze relationship between species abundances #
+###################################################
+
 df <- read.csv("plec-and-valerianella-abundances-and-env-conditions.csv")
 
 View(df)
@@ -110,12 +115,11 @@ df[df == ""] <- NA
 df[df == "#DIV/0!"] <- NA
 
 
-# first filter out Thetis lake data
+# first filter out Thetis lake data 
 df_filtered <- df %>% 
   filter(Site != "Thetis")
 
-# at 0.1 m^2 density
-
+# relationship between abundances at 0.1 m^2 density
 mixed_m9 <- glmer.nb(X.Valerianella ~ X.Plectritis..including.pollinator.focal.plants. 
                      + (1|Site/Transect/Plot), 
                      data = df_filtered,  na.action=na.omit) 
@@ -128,15 +132,10 @@ summary(mixed_m9.2)
 
 anova(mixed_m9, mixed_m9.2, test = "LRT")
 
-
-summary(m_abundances_1 <- glm.nb(X.Valerianella
-                                 ~ X.Plectritis..including.pollinator.focal.plants., 
-                                 data = df_filtered))
-
 ##########
 ##########
 
-# at 1m^2 density
+# relationship between abundances at 1m^2 density
 
 mixed_m10 <- glmer.nb(X.Valerianella.1m.2..including.subplots. ~ X.Plectritis.1m.2..including.subplots. 
                      + (1|Site/Transect/Plot), 
@@ -149,8 +148,3 @@ mixed_m10.2 <- glmer.nb(X.Valerianella.1m.2..including.subplots. ~
 summary(mixed_m10.2)
 
 anova(mixed_m10, mixed_m10.2, test = "LRT")
-
-summary(m_abundances_2 <- glm.nb(X.Valerianella.1m.2..including.subplots.
-                                 ~ X.Plectritis.1m.2..including.subplots., 
-                                 data = df_filtered))
-############
