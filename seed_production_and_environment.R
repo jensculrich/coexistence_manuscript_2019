@@ -1,5 +1,7 @@
-# this file generates predicted fecundities based on plant trait measurements
-# and analyzes relationships between fecundity and environment
+# this file contains code to generate predicted 
+# fecundities based on plant trait measurements
+# and to analyze relationships between fecundity 
+# and soil moisture and soil depth
 
 library(tidyverse)
 library(stats4)
@@ -79,8 +81,6 @@ colnames(traits)[which(names(traits) == "num_infl")] <- "number_of_inflors"
 colnames(traits)[which(names(traits) == "inf_volume")] <- "infvol"
 colnames(traits)[which(names(traits) == "Fruit")] <- "num_seeds"
 
-abundances <- read.csv("plec-and-valerianella-abundances-and-env-conditions.csv")
-
 # Best model for PLCO
 P_m5 <- glm.nb(num_seeds ~ plant_height + number_of_inflors + infvol, 
                data = traits)
@@ -91,10 +91,10 @@ summary(P_m5.2)
 
 df_PLCO <- df_PLCO %>%
   mutate(num_seeds2 = 12.41195 + 1.03474*plant_height) 
-## when using predict it was taking exp(coefficient*value) rather than exp(coefficient)*value
-## so I manually computed seeds (num_seeds2) by multiply each value by exp(coefficient)
 
+abundances <- read.csv("plec-and-valerianella-abundances-and-env-conditions.csv")
 abundances$subplot_id<- 1:nrow(abundances) 
+
 fitness_and_abundances_PLCO <- inner_join(df_PLCO, abundances)
 fitness_and_abundances_PLCO[fitness_and_abundances_PLCO == "-"] <- NA
 fitness_and_abundances_PLCO[fitness_and_abundances_PLCO == ""] <- NA
