@@ -56,13 +56,12 @@ str(fitness_and_abundances_PLCO2_filtered)
 mixed_m1 <- glmer.nb(num_seeds2 ~ X.Plectritis..including.pollinator.focal.plants. 
                      + (1|Transect/Plot), 
           data = fitness_and_abundances_PLCO2_filtered,  na.action=na.omit) 
-summary(mixed_m1) # singular boundary due to small capture ofvarianve by random effects
-# Plectritis is non-significant
+summary(mixed_m1)
 
 ## estimate intercept without independent variables
 mixed_m2 <- glmer.nb(num_seeds2 ~ (1|Transect/Plot), 
                      data = fitness_and_abundances_PLCO2_filtered,  na.action=na.omit) 
-summary(mixed_m2) # # Plectritis is non-significant
+summary(mixed_m2)
 anova(mixed_m1, mixed_m2, test = "LRT")
 
 # valerianella fitness against plectritis density with mixed effects glm.nb 
@@ -83,12 +82,12 @@ anova(mixed_m3, mixed_m4, test = "LRT")
 mixed_m5 <- glmer.nb(num_seeds2 ~ X.Valerianella 
                      + (1|Transect/Plot), 
                      data = fitness_and_abundances_PLCO2_filtered,  na.action=na.omit) 
-summary(mixed_m5) # singular boundary due to small capture of varianve by random effects
+summary(mixed_m5) 
 
 # estimate intercept without independent variables
 mixed_m6 <- glmer.nb(num_seeds2 ~ (1|Transect/Plot), 
                      data = fitness_and_abundances_PLCO2_filtered,  na.action=na.omit) 
-summary(mixed_m6) # singular boundary due to small capture ofvarianve by random effects
+summary(mixed_m6) 
 anova(mixed_m5, mixed_m6, test = "LRT")
 
 # plectritis fitness against valerianella density with mixed effects glm.nb 
