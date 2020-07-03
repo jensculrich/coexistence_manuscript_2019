@@ -15,6 +15,7 @@ library(purrr)
 library(repurrrsive)
 library(listviewer)
 library(gnlm)
+library(boot)
 library(propagate)
 ```
 
@@ -24,21 +25,11 @@ library(propagate)
 list.files()
 SEEDS <- read.csv("Seed_Counts.csv")
 SEEDS <- SEEDS %>% drop_na(num_seeds)
-# View(SEEDS)
-SEEDS <- select(SEEDS, num_seeds, focal_species, background_species, background_density, treatment)
-View(SEEDS)
-# subset_SEEDS <- filter(SEEDS, focal_species == "PLCO", background_species == "PLCO" | background_species == "none", treatment == "Drought-stressed")
+
 
 ## germination values are assumed to be global, not affected by treatment or seeding densities
 germination_i = 0.670
 germination_j = 0.891
-
-## used maximum likelihood method to estimate parameters
-## We then used gnlr (function
-## ''gnlr,'' method ''L-BFGS-B,'' and negative binomial error
-## structure [R Development Core Team 2011]) to fit both
-## lambda and alpha values (bounded to be positive) according to the function
-
 ```
 
 #### Estimate parameters in dry treatment conditions
@@ -51,18 +42,49 @@ subset_SEEDS <- filter(SEEDS, focal_species == "PLCO", background_species == "PL
 
 #m2_PLCO_aii_drought <- nls(num_seeds~lambda/(1+alpha*germination_i*background_density), data=subset_SEEDS, start=list(lambda=380, alpha=0.22))
 #y <- subset_SEEDS$num_seeds*germination_i
-x <- subset_SEEDS$background_density
+#x <- subset_SEEDS$background_density
 
-#summary(m2_PLCO_aii_drought)
-#confint(m2_PLCO_aii_drought) 
 attach(subset_SEEDS)
 mu <- function(p) p[1]/(1+p[2]*background_density)
-m2_PLCO_aii_drought <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(380,0.22), pshape=1)
-# sd = se x sqrt(n)
-# se = 42.51
-# n = 43
-stdev = 42.51*sqrt(43)
-rand = rnorm(n=1, mean=364.2, sd=stdev)
+m2_PLCO_aii_drought <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(400,0.5), pshape=1)
+
+# Bootstrap 
+
+# function to setimate parameters from given seed_count and background density
+mu <- function(p) p[1]/(1+p[2]*background_density)
+
+# function to obtain p1 from the data
+p1 <- function(formula, data, indices) {
+  d <- sample_n(data, 35) # allows boot to select sample
+  attach(d)
+  fit <- gnlr(num_seeds, dist="negative binomial", mu=formula, pmu=c(400,0.50), pshape=1)
+  return(fit[[18]][1])
+}
+
+# bootstrapping with 50 replications
+set.seed(1)
+results_lambda_i_dry <- boot(data=subset_SEEDS, p1,
+   R=50, formula=mu)
+
+# view results
+results_lambda_i_dry
+
+
+# function to obtain p2 from the data
+p2 <- function(formula, data, indices) {
+  d <- sample_n(data, 35) # allows boot to select sample
+  attach(d)
+  fit <- gnlr(num_seeds, dist="negative binomial", mu=formula, pmu=c(400,0.50), pshape=1)
+  return(fit[[18]][2])
+}
+
+# bootstrapping with 50 replications
+set.seed(1)
+results_alpha_ii_dry <- boot(data=subset_SEEDS, p2,
+   R=50, formula=mu)
+
+# view results
+results_alpha_ii_dry
 ```
 
 # aij
@@ -82,6 +104,28 @@ subset_SEEDS <- filter(SEEDS, focal_species == "PLCO", background_species == "VA
 attach(subset_SEEDS)
 mu <- function(p) p[1]/(1+p[2]*background_density)
 m2_PLCO_aij_drought <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(360,0.30), pshape=1)
+
+# Bootstrap 
+
+# function to setimate parameters from given seed_count and background density
+mu <- function(p) p[1]/(1+p[2]*background_density)
+
+
+# function to obtain p2 from the data
+p2 <- function(formula, data, indices) {
+  d <- sample_n(data, 35) # allows boot to select sample
+  attach(d)
+  fit <- gnlr(num_seeds, dist="negative binomial", mu=formula, pmu=c(400,0.50), pshape=1)
+  return(fit[[18]][2])
+}
+
+# bootstrapping with 50 replications
+set.seed(1)
+results_alpha_ij_dry <- boot(data=subset_SEEDS, p2,
+   R=50, formula=mu)
+
+# view results
+results_alpha_ij_dry
 ```
 
 # ajj
@@ -100,7 +144,44 @@ subset_SEEDS <- filter(SEEDS, focal_species == "VALO", background_species == "VA
 
 attach(subset_SEEDS)
 mu <- function(p) p[1]/(1+p[2]*background_density)
-m2_VALO_ajj_drought <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(625,0.70), pshape=1)
+m2_VALO_ajj_drought <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(500,0.5), pshape=1)
+
+# Bootstrap 
+
+# function to setimate parameters from given seed_count and background density
+mu <- function(p) p[1]/(1+p[2]*background_density)
+
+# function to obtain p1 from the data
+p1 <- function(formula, data, indices) {
+  d <- sample_n(data, 35) # allows boot to select sample
+  attach(d)
+  fit <- gnlr(num_seeds, dist="negative binomial", mu=formula, pmu=c(500,0.50), pshape=1)
+  return(fit[[18]][1])
+}
+
+# bootstrapping with 50 replications
+set.seed(1)
+results_lambda_j_dry <- boot(data=subset_SEEDS, p1,
+   R=50, formula=mu)
+
+# view results
+results_lambda_j_dry
+
+# function to obtain p2 from the data
+p2 <- function(formula, data, indices) {
+  d <- sample_n(data, 35) # allows boot to select sample
+  attach(d)
+  fit <- gnlr(num_seeds, dist="negative binomial", mu=formula, pmu=c(600,0.50), pshape=1)
+  return(fit[[18]][2])
+}
+
+# bootstrapping with 50 replications
+set.seed(1)
+results_alpha_jj_dry <- boot(data=subset_SEEDS, p2,
+   R=50, formula=mu)
+
+# view results
+results_alpha_jj_dry
 ```
 
 # aji
@@ -120,6 +201,28 @@ subset_SEEDS <- filter(SEEDS, focal_species == "VALO", background_species == "PL
 attach(subset_SEEDS)
 mu <- function(p) p[1]/(1+p[2]*background_density)
 m2_VALO_aji_drought <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(636,0.40), pshape=1)
+
+# Bootstrap 
+
+# function to setimate parameters from given seed_count and background density
+mu <- function(p) p[1]/(1+p[2]*background_density)
+
+
+# function to obtain p2 from the data
+p2 <- function(formula, data, indices) {
+  d <- sample_n(data, 35) # allows boot to select sample
+  attach(d)
+  fit <- gnlr(num_seeds, dist="negative binomial", mu=formula, pmu=c(600, 0.50), pshape=1)
+  return(fit[[18]][2])
+}
+
+# bootstrapping with 50 replications
+set.seed(1)
+results_alpha_ji_dry <- boot(data=subset_SEEDS, p2,
+   R=50, formula=mu)
+
+# view results
+results_alpha_ji_dry
 ```
 
 # synthesize parameter estimates and calculate coexistence criterion 
@@ -174,16 +277,46 @@ ifelse(p_drought < fitness_ratio_drought & fitness_ratio_drought < 1/p_drought, 
 ##aii
 subset_SEEDS <- filter(SEEDS, focal_species == "PLCO", background_species == "PLCO" | background_species == "none", treatment == "Well-watered")
 
-#m2_PLCO_aii_wet<-nls(num_seeds~lambda/(1+alpha*germination_i*background_density), data=subset_SEEDS, start=list(lambda=489, alpha=0.4897263))
-#y<-subset_SEEDS$num_seeds
-#x<-subset_SEEDS$background_density
-
-#summary(m2_PLCO_aii_wet)
-#confint(m2_PLCO_aii_wet) 
-
 attach(subset_SEEDS)
 mu <- function(p) p[1]/(1+p[2]*background_density)
-m2_PLCO_aii_wet <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(400,0.40), pshape=1)         
+m2_PLCO_aii_wet <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(400,0.40), pshape=1)  
+
+# Bootstrap 
+
+# function to setimate parameters from given seed_count and background density
+mu <- function(p) p[1]/(1+p[2]*background_density)
+
+# function to obtain p1 from the data
+p1 <- function(formula, data, indices) {
+  d <- sample_n(data, 35) # allows boot to select sample
+  attach(d)
+  fit <- gnlr(num_seeds, dist="negative binomial", mu=formula, pmu=c(400,0.50), pshape=1)
+  return(fit[[18]][1])
+}
+
+# bootstrapping with 50 replications
+set.seed(1)
+results_lambda_i_wet <- boot(data=subset_SEEDS, p1,
+   R=50, formula=mu)
+
+# view results
+results_lambda_i_wet
+
+# function to obtain p2 from the data
+p2 <- function(formula, data, indices) {
+  d <- sample_n(data, 35) # allows boot to select sample
+  attach(d)
+  fit <- gnlr(num_seeds, dist="negative binomial", mu=formula, pmu=c(400,0.50), pshape=1)
+  return(fit[[18]][2])
+}
+
+# bootstrapping with 50 replications
+set.seed(1)
+results_alpha_ii_wet <- boot(data=subset_SEEDS, p2,
+   R=50, formula=mu)
+
+# view results
+results_alpha_ii_wet
 ```
 
 # aij
@@ -203,6 +336,27 @@ subset_SEEDS <- filter(SEEDS, focal_species == "PLCO", background_species == "VA
 attach(subset_SEEDS)
 mu <- function(p) p[1]/(1+p[2]*background_density)
 m2_PLCO_aij_wet <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(400,0.40), pshape=1)  
+
+# Bootstrap 
+
+# function to setimate parameters from given seed_count and background density
+mu <- function(p) p[1]/(1+p[2]*background_density)
+
+# function to obtain p2 from the data
+p2 <- function(formula, data, indices) {
+  d <- sample_n(data, 35) # allows boot to select sample
+  attach(d)
+  fit <- gnlr(num_seeds, dist="negative binomial", mu=formula, pmu=c(400,0.50), pshape=1)
+  return(fit[[18]][2])
+}
+
+# bootstrapping with 50 replications
+set.seed(1)
+results_alpha_ij_wet <- boot(data=subset_SEEDS, p2,
+   R=50, formula=mu)
+
+# view results
+results_alpha_ij_wet
 ```
 
 # ajj
@@ -222,6 +376,43 @@ subset_SEEDS <- filter(SEEDS, focal_species == "VALO", background_species == "VA
 attach(subset_SEEDS)
 mu <- function(p) p[1]/(1+p[2]*background_density)
 m2_VALO_ajj_wet <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(300,0.45), pshape=1) 
+
+# Bootstrap 
+
+# function to setimate parameters from given seed_count and background density
+mu <- function(p) p[1]/(1+p[2]*background_density)
+
+# function to obtain p1 from the data
+p1 <- function(formula, data, indices) {
+  d <- sample_n(data, 35) # allows boot to select sample
+  attach(d)
+  fit <- gnlr(num_seeds, dist="negative binomial", mu=formula, pmu=c(400,0.50), pshape=1)
+  return(fit[[18]][1])
+}
+
+# bootstrapping with 50 replications
+set.seed(1)
+results_lambda_j_wet <- boot(data=subset_SEEDS, p1,
+   R=50, formula=mu)
+
+# view results
+results_lambda_j_wet
+
+# function to obtain p2 from the data
+p2 <- function(formula, data, indices) {
+  d <- sample_n(data, 35) # allows boot to select sample
+  attach(d)
+  fit <- gnlr(num_seeds, dist="negative binomial", mu=formula, pmu=c(400,0.50), pshape=1)
+  return(fit[[18]][2])
+}
+
+# bootstrapping with 50 replications
+set.seed(1)
+results_alpha_jj_wet <- boot(data=subset_SEEDS, p2,
+   R=50, formula=mu)
+
+# view results
+results_alpha_jj_wet
 ```
 
 # aji
@@ -241,6 +432,22 @@ subset_SEEDS <- filter(SEEDS, focal_species == "VALO", background_species == "PL
 attach(subset_SEEDS)
 mu <- function(p) p[1]/(1+p[2]*background_density)
 m2_VALO_aji_wet <- gnlr(num_seeds, dist="negative binomial", mu=mu, pmu=c(325,0.38), pshape=1) 
+
+# function to obtain p2 from the data
+p2 <- function(formula, data, indices) {
+  d <- sample_n(data, 35) # allows boot to select sample
+  attach(d)
+  fit <- gnlr(num_seeds, dist="negative binomial", mu=formula, pmu=c(400,0.50), pshape=1)
+  return(fit[[18]][2])
+}
+
+# bootstrapping with 50 replications
+set.seed(1)
+results_alpha_ji_wet <- boot(data=subset_SEEDS, p2,
+   R=50, formula=mu)
+
+# view results
+results_alpha_ji_wet
 ```
 
 # synthesize parameter estimates and calculate coexistence criterion 
@@ -289,12 +496,12 @@ ifelse(p_wet < fitness_ratio_wet & fitness_ratio_wet < 1/p_wet, "coexistence pre
 ## Estimate parameter error using propogate (dry conditions)
 ```{r}
 # enter parameter estimates with sd's
-lambda_p <- c(364.2, 42.51)
-lambda_v <- c(636.1, 89.7)
-alpha_pv <- c(0.30, 0.10)
-alpha_vp <- c(0.43, 0.11)
-alpha_pp <- c(0.23, 0.05)
-alpha_vv <- c(0.72, 0.15)
+lambda_p <- c(365.9, 17.7)
+lambda_v <- c(650, 57.4)
+alpha_pv <- c(.29, 0.03)
+alpha_vp <- c(0.45, 0.05)
+alpha_pp <- c(0.25, 0.02)
+alpha_vv <- c(0.73, 0.11)
 
 # enter data from germination test
 germination_p = c(0.670, 0)
@@ -353,12 +560,12 @@ RES4
 
 ## Estimate parameter error using propogate (wet conditions)
 ```{r}
-lambda_p <- c(428.1, 60.7)
-lambda_v <- c(303.1, 58.2)
-alpha_pv <- c(0.33, 0.10)
-alpha_vp <- c(0.37, 0.10)
-alpha_pp <- c(0.40, 0.10)
-alpha_vv <- c(0.48, 0.15)
+lambda_p <- c(391.23, 27.8)
+lambda_v <- c(327.4, 24.8)
+alpha_pv <- c(0.27, 0.09)
+alpha_vp <- c(0.42, 0.04)
+alpha_pp <- c(0.37, 0.06)
+alpha_vv <- c(0.47, 0.06)
 
 germination_p = c(0.670, 0)
 germination_v = c(0.891, 0)
@@ -398,18 +605,19 @@ RES3_wet <- propagate(expr = EXPR3_wet, data = DF3_wet, type = "stat",
                   nsim = 1000000)
 RES3_wet
 
-# fitness ratio
+
+## calculate fitness ratio
+# estimated this mean directly from the alpha and lambda parameters
+# rather than multiplying the demographic and competitive response ratios above
+
 EXPR4_wet <- expression((sqrt((alpha_pv/alpha_vv)*(alpha_pp/alpha_vp)))*
                       (
-                        (((lambda_v*germination_v)/(1 - (1 - germination_v)(survival_v))))/
-                          (((lambda_p*germination_p)/(1 - (1 - germination_p)(survival_p))))
+                        ((lambda_v*germination_v)/(germination_v))/
+                          ((lambda_p*germination_p)/(germination_p))
                       )
 )
-
 DF4_wet <- cbind(lambda_p, lambda_v, germination_p, germination_v, 
-             alpha_pv, alpha_vp, alpha_pp, alpha_vv,
-             survival_v, survival_p)
-
+             alpha_pv, alpha_vp, alpha_pp, alpha_vv)
 RES4_wet <- propagate(expr = EXPR4_wet, data = DF4_wet, type = "stat",
                   do.sim = TRUE, verbose = TRUE,
                   nsim = 1000000)
@@ -428,9 +636,9 @@ fun.2 <- function(x) 1 + x
 
 
 T <- ggplot(df, aes(x=(1-mean_p), y=mean_k, colour=X)) + 
-  geom_errorbar(aes(ymin=mean_k-sd_k, ymax=mean_k+sd_k), width=.05, size = 1) +
+  geom_errorbar(aes(ymin=mean_k-se_k, ymax=mean_k+se_k), width=.05, size = 1) +
   geom_point(size = 6) 
-T <- T + geom_errorbarh(aes(xmin=0, xmax=(1-mean_p+sd_p), height=.05)) 
+T <- T + geom_errorbarh(aes(xmin=(1-mean_p-se_p), xmax=(1-mean_p+se_p), height=.05)) 
 
 T <- T + theme_bw() + 
   theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + 
@@ -460,9 +668,9 @@ T <- T + stat_function(fun = fun.1, size = 1.5, colour = "grey30")
 T <- T + stat_function(fun = fun.2, size = 1.5, colour = "grey30")
 
 
-grob <- grobTree(textGrob(substitute(paste(italic("Valerianella "), "dominant")), x=0.05,  y=0.83, hjust=0,
+grob <- grobTree(textGrob(substitute(paste(italic("V. locusta "), "dominant")), x=0.05,  y=0.83, hjust=0,
                           gp=gpar(col="black", fontsize=20)))
-grob2 <- grobTree(textGrob(substitute(paste(italic("Plectritis "), "dominant")), x=0.05,  y=0.05, hjust=0,
+grob2 <- grobTree(textGrob(substitute(paste(italic("P. congesta "), "dominant")), x=0.05,  y=0.05, hjust=0,
                           gp=gpar(col="black", fontsize=20)))
 grob3 <- grobTree(textGrob("exclusion", x=0.4,  y=0.95, hjust=0,
                           gp=gpar(col="black", fontsize=20)))
@@ -493,12 +701,12 @@ T
 # species j = Valerianella  
 # species i = Plectritis
 
-lambda_p <- c(428.1, 60.7)
-lambda_v <- c(303.1, 58.2)
-alpha_pv <- c(0.33, 0.10)
-alpha_vp <- c(0.37, 0.10)
-alpha_pp <- c(0.40, 0.10)
-alpha_vv <- c(0.48, 0.15)
+lambda_p <- c(391.23, 27.8)
+lambda_v <- c(327.4, 24.8)
+alpha_pv <- c(0.27, 0.09)
+alpha_vp <- c(0.42, 0.04)
+alpha_pp <- c(0.37, 0.06)
+alpha_vv <- c(0.47, 0.06)
 
 ## From Hart et al. 2019
 ## "we quantified the invasion growth rate of sic (j) invading sic (i).
@@ -536,12 +744,12 @@ RES2
 # species i = Plectritis
 
 # enter parameter estimates with sd's
-lambda_p_dry <- c(364.2, 42.51)
-lambda_v_dry <- c(636.1, 89.7)
-alpha_pv_dry <- c(0.30, 0.10)
-alpha_vp_dry <- c(0.43, 0.11)
-alpha_pp_dry <- c(0.23, 0.05)
-alpha_vv_dry <- c(0.72, 0.15)
+lambda_p_dry <- c(365.9, 17.7)
+lambda_v_dry <- c(650, 57.4)
+alpha_pv_dry <- c(.29, 0.03)
+alpha_vp_dry <- c(0.45, 0.05)
+alpha_pp_dry <- c(0.25, 0.02)
+alpha_vv_dry <- c(0.73, 0.11)
 
 
 ## invasion growth rate Valerianella (dry)
@@ -563,10 +771,10 @@ RES2_dry <- propagate(expr = EXPR2_dry, data = DF2_dry, type = "stat",
 RES2_dry
 
 
-mean_inv_growth_rate_j <- as.data.frame(rbind(0.765, 0.935))
-sd_inv_growth_rate_j <- as.data.frame(rbind(0.335, 0.357))
-mean_inv_growth_rate_i <- as.data.frame(rbind(2.05, 1.37))
-sd_inv_growth_rate_i <- as.data.frame(rbind(1.01, 0.593))
+mean_inv_growth_rate_j <- as.data.frame(rbind(0.74, 0.99))
+sd_inv_growth_rate_j <- as.data.frame(rbind(0.15, 0.17))
+mean_inv_growth_rate_i <- as.data.frame(rbind(2.08, 1.43))
+sd_inv_growth_rate_i <- as.data.frame(rbind(0.77, 0.29))
 
 colnames(mean_inv_growth_rate_j) <- "mean_inv_growth_rate"
 colnames(sd_inv_growth_rate_j) <- "sd_inv_growth_rate"
@@ -624,6 +832,7 @@ E <- E + geom_hline(yintercept= 1, linetype="dashed",
 E <- E + theme(legend.position = c(0.75, 0.9))
 E <- E + coord_fixed(ratio = 0.45)
 E <- E + theme(axis.line = element_line(colour = 'black', size = 1))
+E <- E + scale_x_discrete(labels = c('P. congesta','V. locusta'))
 E
 ```
 
@@ -632,7 +841,7 @@ E
 
 ggarrange(T + theme(plot.margin = margin(r = 0, l = 0, t = 45, b = 25)), 
           E + theme(plot.margin = margin(r = 0, l = 20, t = 0, b = 0)), 
-          labels = c("(A)", "(B)"), font.label = list(size = 20))
+          labels = c("(a)", "(b)"), font.label = list(size = 20))
 
 ```
 
@@ -653,12 +862,12 @@ subset_SEEDS_ajj <- filter(SEEDS, focal_species == "VALO", background_species ==
 P <- ggplot(subset_SEEDS_drought_PLCO, aes(x = background_density, y = num_seeds, color = interaction(focal_species, background_species, sep=" vs. ",lex.order=TRUE)))
 P <- P + geom_jitter(aes(background_density, num_seeds, shape=background_species), width = 1, size = 1.5, alpha=.7) 
 # function = number_seeds ~ lambda / 1 + alpha*background_density
-function_1 <- function(x) 364/(1+.23*x)
+function_1 <- function(x) 366/(1+.25*x)
 P <- P + stat_function(data = subset_SEEDS_aii, fun = function_1, size = 1, colour = "black")
-function_2 <- function(x) 364/(1+.30*x)
+function_2 <- function(x) 366/(1+.29*x)
 P <- P + stat_function(data = subset_SEEDS_aij, fun = function_2, size = 1, colour = "black", linetype = "dashed")
 P <- P + scale_shape_manual(values=c(19,1))
-P <- P + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="Neighbor Density", y="Seeds/plant") + ggtitle("(A)")
+P <- P + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="Neighbor density", y="P. congesta seeds/plant")
 P <- P + theme(legend.position="none")
 P <- P + scale_color_manual(values=c("black", "black"))
 P <- P + theme(axis.line = element_line(size = 1))
@@ -673,18 +882,27 @@ P <- P + theme(axis.title.x = element_text(size = 20),
                ),
                # Y axis text
                axis.text.y = element_text(size = 16))
+<<<<<<< HEAD
 P <- P + ylim(0, 1250)
+=======
+P <- P + theme(axis.line = element_line(size = 1))
+>>>>>>> 1cde5575098e4340b55028e4827ee0ffd33a81c0
 P
 
 #### (B) Plot VALO focals in dry
 R <- ggplot(subset_SEEDS_drought_VALO, aes(x = background_density, y = num_seeds, color = interaction(focal_species, background_species, sep=" vs. ",lex.order=TRUE)))
+<<<<<<< HEAD
 R <- R + geom_jitter(aes(background_density, num_seeds, shape=background_species), width = 1, size = 1.5, alpha=.7) 
 function_3 <- function(x) 636 /(1+.43*x)
+=======
+R <- R + geom_jitter(aes(background_density, num_seeds, shape=background_species), width = 1, size = 2, alpha=.7) 
+function_3 <- function(x) 650 /(1+.45*x)
+>>>>>>> 1cde5575098e4340b55028e4827ee0ffd33a81c0
 R <- R + stat_function(data = subset_SEEDS_aji, fun = function_3, size = 1, colour = "black", linetype = "dashed")
-function_4 <- function(x) 636 /(1+.72*x)
+function_4 <- function(x) 650 /(1+.73*x)
 R <- R + stat_function(data = subset_SEEDS_ajj, fun = function_4, size = 1, colour = "black")
 R <- R + scale_shape_manual(values=c(1,19))
-R <- R + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="Neighbor Density", y="Seeds/plant") + ggtitle("(B)")
+R <- R + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="Neighbor Density", y="V. locusta seeds/plant")
 R <- R + theme(legend.position="none")
 R <- R + scale_color_manual(values=c("black", "black"))
 R <- R + theme(axis.line = element_line(size = 1))
@@ -699,7 +917,11 @@ R <- R + theme(axis.title.x = element_text(size = 20),
                ),
                # Y axis text
                axis.text.y = element_text(size = 16))
+<<<<<<< HEAD
 R <- R + ylim(0, 1250)
+=======
+R <- R + theme(axis.line = element_line(size = 1))
+>>>>>>> 1cde5575098e4340b55028e4827ee0ffd33a81c0
 R
 
 ## Plot wet
@@ -713,13 +935,18 @@ subset_SEEDS_ajj_wet <- filter(SEEDS, focal_species == "VALO", background_specie
 
 ##### Plot PLCO focals in wet treatment
 Q <- ggplot(subset_SEEDS_wet_PLCO, aes(x = background_density, y = num_seeds, color = interaction(focal_species, background_species, sep=" vs. ",lex.order=TRUE)))
+<<<<<<< HEAD
 Q <- Q + geom_jitter(aes(background_density, num_seeds, shape = background_species), width = 1, size = 1.5, alpha = .7) 
 function_5 <- function(x) 428 /(1+.40*x)
+=======
+Q <- Q + geom_jitter(aes(background_density, num_seeds, shape = background_species), width = 1, size = 2, alpha = .7) 
+function_5 <- function(x) 391 /(1+.37*x)
+>>>>>>> 1cde5575098e4340b55028e4827ee0ffd33a81c0
 Q <- Q + stat_function(data = subset_SEEDS_aii_wet, fun = function_5, size = 1, colour = "black")
-function_6 <- function(x) 428 /(1+.33*x)
+function_6 <- function(x) 391 /(1+.27*x)
 Q <- Q + stat_function(data = subset_SEEDS_aij_wet, fun = function_6, size = 1, colour = "black", linetype = "dashed")
 Q <- Q + scale_shape_manual(values=c(19,1))
-Q <- Q + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="Neighbor Density", y="Seeds/plant") + ggtitle("(C)")
+Q <- Q + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="Neighbor Density", y="P. congesta seeds/plant")
 Q <- Q + theme(legend.position="none")
 Q <- Q + scale_color_manual(values=c("black", "black"))
 Q <- Q + theme(axis.line = element_line(size = 1))
@@ -734,18 +961,27 @@ Q <- Q + theme(axis.title.x = element_text(size = 20),
                ),
                # Y axis text
                axis.text.y = element_text(size = 16))
+<<<<<<< HEAD
 Q <- Q + ylim(0, 1250)
+=======
+Q <- Q + theme(axis.line = element_line(size = 1))
+>>>>>>> 1cde5575098e4340b55028e4827ee0ffd33a81c0
 Q
 
 ##### plot VALO focals in wet
 S <- ggplot(subset_SEEDS_wet_VALO, aes(x = background_density, y = num_seeds, color = interaction(focal_species, background_species, sep=" vs. ",lex.order=TRUE)))
+<<<<<<< HEAD
 S <- S + geom_jitter(aes(background_density, num_seeds, shape = background_species), width = 1, size = 1.5, alpha = .7) 
 function_7 <- function(x) 303 /(1+.48*x)
+=======
+S <- S + geom_jitter(aes(background_density, num_seeds, shape = background_species), width = 1, size = 2, alpha = .7) 
+function_7 <- function(x) 327 /(1+.47*x)
+>>>>>>> 1cde5575098e4340b55028e4827ee0ffd33a81c0
 S <- S + stat_function(data = subset_SEEDS_aji_wet, fun = function_7, size = 1, colour = "black", linetype = "dashed")
-function_8 <- function(x) 303 /(1+.37*x)
+function_8 <- function(x) 327 /(1+.42*x)
 S <- S + stat_function(data = subset_SEEDS_ajj_wet, fun = function_8, size = 1, colour = "black")
 S <- S + scale_shape_manual(values=c(1,19))
-S <- S + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="Neighbor Density", y="Seeds/plant") + ggtitle("(D)")
+S <- S + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="Neighbor Density", y="V. locusta seeds/plant")
 S <- S + theme(legend.position="none")
 S <- S + scale_color_manual(values=c("black", "black"))
 S <- S + theme(axis.line = element_line(size = 1))
@@ -760,7 +996,11 @@ S <- S + theme(axis.title.x = element_text(size = 20),
                ),
                # Y axis text
                axis.text.y = element_text(size = 16))
+<<<<<<< HEAD
 S <- S + ylim(0, 1250)
+=======
+S <- S + theme(axis.line = element_line(size = 1))
+>>>>>>> 1cde5575098e4340b55028e4827ee0ffd33a81c0
 S
 
 
@@ -771,4 +1011,9 @@ require(grid)
 require(gridExtra)
 grid.arrange(P, R, Q, S,  ncol=2, nrow=2, 
              top=textGrob("", gp=gpar(fontsize=20,font=7)))
+ggarrange(P + theme(plot.margin = margin(r = 0, l = 20, t = 20, b = 0)), 
+          Q + theme(plot.margin = margin(r = 0, l = 20, t = 20, b = 0)), 
+          R + theme(plot.margin = margin(r = 0, l = 20, t = 20, b = 0)), 
+          S + theme(plot.margin = margin(r = 0, l = 20, t = 20, b = 0)),
+          labels = c("(a)", "(b)", "(c)", "(d)"), font.label = list(size = 20))
 ```
