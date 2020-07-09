@@ -92,12 +92,12 @@ summary(P_m5.2)
 df_PLCO <- df_PLCO %>%
   mutate(num_seeds2 = 12.41195 + 1.03474*plant_height) 
 
-abundances <- read.csv("plec-and-valerianella-abundances-and-env-conditions.csv")
-abundances$subplot_id<- 1:nrow(abundances) 
+#abundances <- read.csv("plec-and-valerianella-abundances-and-env-conditions.csv")
+#abundances$subplot_id<- 1:nrow(abundances) 
 
-fitness_and_abundances_PLCO <- inner_join(df_PLCO, abundances)
-fitness_and_abundances_PLCO[fitness_and_abundances_PLCO == "-"] <- NA
-fitness_and_abundances_PLCO[fitness_and_abundances_PLCO == ""] <- NA
+#fitness_and_abundances_PLCO <- inner_join(df_PLCO, abundances)
+#fitness_and_abundances_PLCO[fitness_and_abundances_PLCO == "-"] <- NA
+#fitness_and_abundances_PLCO[fitness_and_abundances_PLCO == ""] <- NA
 
 str(fitness_and_abundances_PLCO)
 
