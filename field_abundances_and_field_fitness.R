@@ -1,20 +1,13 @@
-# this file contains code to analyze relationships between fecundity 
-# and hetero-/con-specific densities
-# and between abundance and hetero/conspecific densities
+# this file contains code to analyze relationships 
+# between fecundity and hetero-/con-specific abundance
+# and between abundance and hetero/conspecific abundance
 
 library(tidyverse)
-library(stats4)
-library(nlme)
-library(gridExtra)
-library(grid)
-library(broom)
-library(purrr)
-library(repurrrsive)
-library(listviewer)
-library(ggpubr)
-library(MASS)
 library(lme4)
 
+#################################
+## Data Structuring #############
+#################################
 
 fitness_and_abundances <- read.csv("fitness_and_abundances.csv")
 fitness_and_abundances <- fitness_and_abundances %>%
@@ -50,6 +43,14 @@ fitness_and_abundances_PLCO2_filtered <- fitness_and_abundances_PLCO2 %>%
 # Relationships between fecundity and competitor densities #
 ############################################################
 
+# Presence of a relationship was determined by 
+# evaluating chi-squared statistic from a likelihood ratio test
+# between model with and without competitor as a fixed effect
+
+# Densities are reported from 0.1m^2 plots nested in 1m^2 plots, nested in a transects.
+# 1m^2 plot, nested in transect, is included as a random effect
+# to account for spatial correlation in the data.
+
 # plectritis fitness against plectritis density with mixed effects glm.nb 
 str(fitness_and_abundances_PLCO2_filtered)
 
@@ -74,7 +75,6 @@ mixed_m4 <- glmer.nb(num_seeds2 ~
                      + (1|Transect/Plot), 
                      data = fitness_and_abundances_VALO2_filtered, na.action=na.omit) 
 summary(mixed_m4)
-anova(mixed_m4)
 anova(mixed_m3, mixed_m4, test = "LRT")
 
 #################
@@ -90,7 +90,7 @@ mixed_m6 <- glmer.nb(num_seeds2 ~ (1|Transect/Plot),
 summary(mixed_m6) 
 anova(mixed_m5, mixed_m6, test = "LRT")
 
-# plectritis fitness against valerianella density with mixed effects glm.nb 
+# valerianella fitness against valerianella density with mixed effects glm.nb 
 mixed_m7 <- glmer.nb(num_seeds2 ~ X.Valerianella 
                      + (1|Transect/Plot), 
                      data = fitness_and_abundances_VALO2_filtered,  na.action=na.omit) 
@@ -114,7 +114,7 @@ df[df == ""] <- NA
 df[df == "#DIV/0!"] <- NA
 
 
-# first filter out Thetis lake data 
+# first filter out data from Thetis lake site which was not used in this study 
 df_filtered <- df %>% 
   filter(Site != "Thetis")
 
@@ -130,9 +130,6 @@ mixed_m9.2 <- glmer.nb(X.Valerianella ~
 summary(mixed_m9.2) 
 
 anova(mixed_m9, mixed_m9.2, test = "LRT")
-
-##########
-##########
 
 # relationship between abundances at 1m^2 density
 
