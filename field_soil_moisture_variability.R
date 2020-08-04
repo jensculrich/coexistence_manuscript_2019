@@ -4,6 +4,7 @@
 
 ########################
 library(tidyverse)
+library(nlme) 
 
 # load dataframe for 12cm depth soil moisture readings
 # and for 7cm depth soil moisture readings
@@ -12,7 +13,6 @@ data_long_12cm <- read.csv("soil_moisture_12cm.csv")
 data_long_7cm <- read.csv("soil_moisture_7cm.csv")
 
 ########################
-library(nlme) 
 plot.lme <- lme(moisture~1, random=~1|plot_id, data=data_long_7cm, na.action=na.omit) 
 VarCorr(plot.lme) 
 # intercept gives between plot variation, residual gives within plot variation.
