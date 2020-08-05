@@ -106,7 +106,7 @@ anova(mixed_m7, mixed_m8, test = "LRT")
 # analyze relationship between species abundances #
 ###################################################
 
-df <- read.csv("plec-and-valerianella-abundances-and-env-conditions.csv")
+df <- read.csv("fitness_and_abundances.csv")
 
 View(df)
 df[df == "-"] <- NA

@@ -4,18 +4,8 @@
 # and soil moisture and soil depth
 
 library(tidyverse)
-library(stats4)
-library(nlme)
-library(gridExtra)
-library(grid)
-library(broom)
-library(purrr)
-library(repurrrsive)
-library(listviewer)
 library(varhandle)
-library(plyr)
 library(lme4)
-library(MASS)
 
 ###############################################################################
 # select best model to predict seed production of field plants                #
@@ -193,6 +183,8 @@ anova(m9.2, m9.3, test = "LRT")
 ############
 #soil depth
 
+library(plyr)
+
 # edit data frame to classify soil with depth less than 12 v greater than 12 cm
 fitness_and_abundances_temp2 <- fitness_and_abundances
 PLCO_temp <- fitness_and_abundances_PLCO
@@ -231,3 +223,4 @@ m11.4 <- glmer.nb(num_seeds2 ~ (1|Transect),
 summary(m11.4)
 
 anova(m11.3, m11.4, test = "LRT")
+
