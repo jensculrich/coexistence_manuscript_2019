@@ -863,14 +863,13 @@ P <- ggplot(subset_SEEDS_drought_PLCO, aes(x = background_density, y = num_seeds
 P <- P + geom_jitter(aes(background_density, num_seeds, shape=background_species), width = 1, size = 1.5, alpha=.7) 
 # function = number_seeds ~ lambda / 1 + alpha*background_density
 function_1 <- function(x) 366/(1+.25*x)
-P <- P + stat_function(data = subset_SEEDS_aii, fun = function_1, size = 1, colour = "black")
+P <- P + stat_function(data = subset_SEEDS_aii, fun = function_1, size = 1.5, colour = "black")
 function_2 <- function(x) 366/(1+.29*x)
-P <- P + stat_function(data = subset_SEEDS_aij, fun = function_2, size = 1, colour = "black", linetype = "dashed")
+P <- P + stat_function(data = subset_SEEDS_aij, fun = function_2, size = 1.5, colour = "black", linetype = "dashed")
 P <- P + scale_shape_manual(values=c(19,1))
-P <- P + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="neighbor density", y="seeds/plant")
+P <- P + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="Neighbor density", y="Seeds/plant")
 P <- P + theme(legend.position="none")
 P <- P + scale_color_manual(values=c("black", "black"))
-P <- P + theme(axis.line = element_line(size = 1))
 P <- P + theme(axis.title.x = element_text(size = 16),
                # Y axis title
                axis.title.y = element_text(size = 16),
@@ -883,8 +882,8 @@ P <- P + theme(axis.title.x = element_text(size = 16),
                # Y axis text
                axis.text.y = element_text(size = 16))
 P <- P + ylim(0, 1250)
-P <- P + theme(axis.line = element_line(size = 1))
-P <- P + ggtitle("(a)")
+P <- P + theme(axis.line = element_line(size = 0.75))
+P <- P + ggtitle("(a)") + theme(plot.title = element_text(size = 16, face = "bold"))
 P
 
 #### (B) Plot VALO focals in dry
@@ -893,14 +892,13 @@ R <- R + geom_jitter(aes(background_density, num_seeds, shape=background_species
 function_3 <- function(x) 636 /(1+.43*x)
 R <- R + geom_jitter(aes(background_density, num_seeds, shape=background_species), width = 1, size = 2, alpha=.7) 
 function_3 <- function(x) 650 /(1+.45*x)
-R <- R + stat_function(data = subset_SEEDS_aji, fun = function_3, size = 1, colour = "black", linetype = "dashed")
+R <- R + stat_function(data = subset_SEEDS_aji, fun = function_3, size = 1.5, colour = "black", linetype = "dashed")
 function_4 <- function(x) 650 /(1+.73*x)
-R <- R + stat_function(data = subset_SEEDS_ajj, fun = function_4, size = 1, colour = "black")
+R <- R + stat_function(data = subset_SEEDS_ajj, fun = function_4, size = 1.5, colour = "black")
 R <- R + scale_shape_manual(values=c(1,19))
-R <- R + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="neighbor density", y="seeds/plant")
+R <- R + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="Neighbor density", y="Seeds/plant")
 R <- R + theme(legend.position="none")
 R <- R + scale_color_manual(values=c("black", "black"))
-R <- R + theme(axis.line = element_line(size = 1))
 R <- R + theme(axis.title.x = element_text(size = 16),
                # Y axis title
                axis.title.y = element_text(size = 16),
@@ -913,8 +911,8 @@ R <- R + theme(axis.title.x = element_text(size = 16),
                # Y axis text
                axis.text.y = element_text(size = 16))
 R <- R + ylim(0, 1250)
-R <- R + theme(axis.line = element_line(size = 1))
-R <- R + ggtitle("(c)")
+R <- R + theme(axis.line = element_line(size = 0.75))
+R <- R + ggtitle("(c)") + theme(plot.title = element_text(size = 16, face = "bold"))
 R
 
 ## Plot wet
@@ -932,14 +930,13 @@ Q <- Q + geom_jitter(aes(background_density, num_seeds, shape = background_speci
 function_5 <- function(x) 428 /(1+.40*x)
 Q <- Q + geom_jitter(aes(background_density, num_seeds, shape = background_species), width = 1, size = 2, alpha = .7) 
 function_5 <- function(x) 391 /(1+.37*x)
-Q <- Q + stat_function(data = subset_SEEDS_aii_wet, fun = function_5, size = 1, colour = "black")
+Q <- Q + stat_function(data = subset_SEEDS_aii_wet, fun = function_5, size = 1.5, colour = "black")
 function_6 <- function(x) 391 /(1+.27*x)
-Q <- Q + stat_function(data = subset_SEEDS_aij_wet, fun = function_6, size = 1, colour = "black", linetype = "dashed")
+Q <- Q + stat_function(data = subset_SEEDS_aij_wet, fun = function_6, size = 1.5, colour = "black", linetype = "dashed")
 Q <- Q + scale_shape_manual(values=c(19,1))
-Q <- Q + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="neighbor density", y="seeds/plant")
+Q <- Q + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="Neighbor density", y="Seeds/plant")
 Q <- Q + theme(legend.position="none")
 Q <- Q + scale_color_manual(values=c("black", "black"))
-Q <- Q + theme(axis.line = element_line(size = 1))
 Q <- Q + theme(axis.title.x = element_text(size = 16),
                # Y axis title
                axis.title.y = element_text(size = 16),
@@ -952,8 +949,8 @@ Q <- Q + theme(axis.title.x = element_text(size = 16),
                # Y axis text
                axis.text.y = element_text(size = 16))
 Q <- Q + ylim(0, 1250)
-Q <- Q + theme(axis.line = element_line(size = 1))
-Q <- Q + ggtitle("(b)")
+Q <- Q + theme(axis.line = element_line(size = 0.75))
+Q <- Q + ggtitle("(b)") + theme(plot.title = element_text(size = 16, face = "bold"))
 Q
 
 ##### plot VALO focals in wet
@@ -962,14 +959,13 @@ S <- S + geom_jitter(aes(background_density, num_seeds, shape = background_speci
 function_7 <- function(x) 303 /(1+.48*x)
 S <- S + geom_jitter(aes(background_density, num_seeds, shape = background_species), width = 1, size = 2, alpha = .7) 
 function_7 <- function(x) 327 /(1+.47*x)
-S <- S + stat_function(data = subset_SEEDS_aji_wet, fun = function_7, size = 1, colour = "black", linetype = "dashed")
+S <- S + stat_function(data = subset_SEEDS_aji_wet, fun = function_7, size = 1.5, colour = "black", linetype = "dashed")
 function_8 <- function(x) 327 /(1+.42*x)
-S <- S + stat_function(data = subset_SEEDS_ajj_wet, fun = function_8, size = 1, colour = "black")
+S <- S + stat_function(data = subset_SEEDS_ajj_wet, fun = function_8, size = 1.5, colour = "black")
 S <- S + scale_shape_manual(values=c(1,19))
-S <- S + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="neighbor density", y="seeds/plant")
+S <- S + theme_bw() + theme(plot.title = element_text(hjust = 0), panel.grid.minor = element_blank(), panel.grid.major = element_blank(), panel.border = element_blank()) + theme(legend.title=element_blank()) + labs(x="Neighbor density", y="Seeds/plant")
 S <- S + theme(legend.position="none")
 S <- S + scale_color_manual(values=c("black", "black"))
-S <- S + theme(axis.line = element_line(size = 1))
 S <- S + theme(axis.title.x = element_text(size = 16),
                # Y axis title
                axis.title.y = element_text(size = 16),
@@ -982,8 +978,8 @@ S <- S + theme(axis.title.x = element_text(size = 16),
                # Y axis text
                axis.text.y = element_text(size = 16))
 S <- S + ylim(0, 1250)
-S <- S + theme(axis.line = element_line(size = 1))
-S <- S + ggtitle("(d)")
+S <- S + theme(axis.line = element_line(size = 0.75))
+S <- S + ggtitle("(d)") + theme(plot.title = element_text(size = 16, face = "bold"))
 S
 
 
